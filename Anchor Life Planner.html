@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anchor — Life Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #e8e4da; font-family: "Inter", system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  button { font-family: inherit; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  input::placeholder { color: rgba(0,0,0,0.3); font-style: italic; }
+  .scene { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(0,0,0,0.45); margin-bottom: 14px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="frames/ios-frame.jsx"></script>
+<script type="text/babel" src="frames/macos-window.jsx"></script>
+<script type="text/babel" src="planner-data.jsx"></script>
+<script type="text/babel" src="planner-icons.jsx"></script>
+<script type="text/babel" src="planner-core.jsx"></script>
+<script type="text/babel" src="planner-widgets.jsx"></script>
+<script type="text/babel" src="planner-views.jsx"></script>
+<script type="text/babel" src="planner-pages.jsx"></script>
+<script type="text/babel" src="planner-settings.jsx"></script>
+<script type="text/babel" src="planner-agent.jsx"></script>
+<script type="text/babel" src="planner-team-1o1.jsx"></script>
+<script type="text/babel" src="planner-app.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+function App() {
+  const [tweaks, setTweaks] = useState(TWEAK_DEFAULTS);
+  const [editMode, setEditMode] = useState(false);
+  const [viewMode, setViewMode] = useState('all'); // all | desktop | ipad | mobile
+
+  // Edit mode protocol
+  useEffect(() => {
+    const handler = (e) => {
+      const msg = e.data;
+      if (!msg || typeof msg !== 'object') return;
+      if (msg.type === '__activate_edit_mode') setEditMode(true);
+      if (msg.type === '__deactivate_edit_mode') setEditMode(false);
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const updateTweak = (path, value) => {
+    setTweaks(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      const parts = path.split('.');
+      let cur = next;
+      for (let i = 0; i < parts.length - 1; i++) cur = cur[parts[i]];
+      cur[parts[parts.length - 1]] = value;
+      window.parent.postMessage({ type: '__edit_mode_set_keys', edits: next }, '*');
+      return next;
+    });
+  };
+
+  const pal = PALETTE[tweaks.mode];
+
+  return (
+    <div style={{
+      width: '100vw', height: '100vh', overflow: 'auto',
+      background: tweaks.mode === 'dark' ? '#0f0e12' : '#E8E2D3',
+      padding: '48px 40px 80px',
+      position: 'relative',
+    }}>
+      {/* Title strip */}
+      <div style={{ maxWidth: 2400, margin: '0 auto 32px', display: 'flex', alignItems: 'baseline', gap: 20 }}>
+        <div>
+          <div className="scene" style={{ color: tweaks.mode === 'dark' ? 'rgba(255,255,255,0.5)' : undefined }}>
+            prototype · life planner
+          </div>
+          <div style={{
+            fontFamily: '"Newsreader", Georgia, serif', fontStyle: 'italic',
+            fontSize: 48, color: tweaks.mode === 'dark' ? '#F0EDE4' : '#1C1A15',
+            letterSpacing: -1, lineHeight: 1,
+          }}>
+            Anchor
+          </div>
+          <div style={{
+            fontFamily: 'Inter, sans-serif', fontSize: 13,
+            color: tweaks.mode === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+            marginTop: 8, maxWidth: 560,
+          }}>
+            A quiet life planner — tasks, schedule, habits, wellness, notes, and the small commitments that run a life. Shown on desktop, iPad, and mobile.
+          </div>
+        </div>
+        <div style={{ flex: 1 }} />
+        <div style={{ display: 'flex', gap: 6, border: `1px solid ${tweaks.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`, padding: 2, borderRadius: 2 }}>
+          {['all','desktop','ipad','mobile'].map(v => (
+            <button key={v} onClick={() => setViewMode(v)} style={{
+              border: 'none', background: viewMode === v ? (tweaks.mode === 'dark' ? '#F0EDE4' : '#1C1A15') : 'transparent',
+              color: viewMode === v ? (tweaks.mode === 'dark' ? '#1C1A15' : '#F0EDE4') : (tweaks.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'),
+              padding: '8px 16px', cursor: 'pointer',
+              fontFamily: '"JetBrains Mono", monospace', fontSize: 10,
+              textTransform: 'uppercase', letterSpacing: 0.8,
+            }}>{v}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Devices */}
+      <div style={{ maxWidth: 2400, margin: '0 auto', display: 'flex', gap: 64, alignItems: 'flex-start', flexWrap: 'wrap', justifyContent: 'center' }}>
+        {(viewMode === 'all' || viewMode === 'desktop') && (
+          <DesktopFrame tweaks={tweaks} />
+        )}
+        {(viewMode === 'all' || viewMode === 'ipad') && (
+          <IPadFrame tweaks={tweaks} />
+        )}
+        {(viewMode === 'all' || viewMode === 'mobile') && (
+          <MobileFrame tweaks={tweaks} />
+        )}
+      </div>
+
+      {editMode && <TweaksPanel tweaks={tweaks} updateTweak={updateTweak} />}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Desktop frame (macOS-style browser window)
+// ─────────────────────────────────────────────────────────────
+function DesktopFrame({ tweaks }) {
+  return (
+    <div>
+      <div className="scene" style={{ color: tweaks.mode === 'dark' ? 'rgba(255,255,255,0.5)' : undefined }}>
+        Desktop · 1280 × 800
+      </div>
+      <div style={{
+        width: 1280, height: 800, borderRadius: 10, overflow: 'hidden',
+        boxShadow: '0 40px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.15)',
+        background: PALETTE[tweaks.mode].paper,
+        display: 'flex', flexDirection: 'column',
+      }}>
+        {/* title bar */}
+        <div style={{
+          height: 36, background: tweaks.mode === 'dark' ? '#2a272c' : '#EDE7D8',
+          borderBottom: `1px solid ${PALETTE[tweaks.mode].rule}`,
+          display: 'flex', alignItems: 'center', padding: '0 14px', gap: 8, flexShrink: 0,
+        }}>
+          <div style={{ display: 'flex', gap: 7 }}>
+            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff736a' }} />
+            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#febc2e' }} />
+            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#19c332' }} />
+          </div>
+          <div style={{
+            flex: 1, textAlign: 'center',
+            fontFamily: '"Newsreader", serif', fontStyle: 'italic', fontSize: 13,
+            color: tweaks.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.55)',
+          }}>Anchor — Today, April 18</div>
+          <div style={{ width: 40 }} />
+        </div>
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          <PlannerApp tweaks={tweaks} containerWidth={1280} frame="desktop" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// iPad frame
+// ─────────────────────────────────────────────────────────────
+function IPadFrame({ tweaks }) {
+  return (
+    <div>
+      <div className="scene" style={{ color: tweaks.mode === 'dark' ? 'rgba(255,255,255,0.5)' : undefined }}>
+        iPad · 820 × 1180
+      </div>
+      <div style={{
+        width: 820, height: 1180, borderRadius: 44, overflow: 'hidden',
+        background: '#000', padding: 14,
+        boxShadow: '0 40px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.2)',
+      }}>
+        <div style={{
+          width: '100%', height: '100%', borderRadius: 30, overflow: 'hidden',
+          background: PALETTE[tweaks.mode].paper, position: 'relative',
+        }}>
+          {/* status bar */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 24,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '8px 28px', zIndex: 10,
+            fontFamily: '-apple-system, system-ui', fontSize: 12, fontWeight: 600,
+            color: tweaks.mode === 'dark' ? '#fff' : '#000',
+          }}>
+            <span>9:41</span>
+            <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <span style={{ fontSize: 10 }}>100%</span>
+              <div style={{
+                width: 22, height: 10, border: `1px solid currentColor`, borderRadius: 2, position: 'relative',
+              }}>
+                <div style={{ position: 'absolute', inset: 1, background: 'currentColor', borderRadius: 1 }} />
+              </div>
+            </span>
+          </div>
+          <div style={{ paddingTop: 24, height: '100%' }}>
+            <PlannerApp tweaks={tweaks} containerWidth={792} frame="ipad" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Mobile frame
+// ─────────────────────────────────────────────────────────────
+function MobileFrame({ tweaks }) {
+  return (
+    <div>
+      <div className="scene" style={{ color: tweaks.mode === 'dark' ? 'rgba(255,255,255,0.5)' : undefined }}>
+        iPhone · 402 × 874
+      </div>
+      <div style={{
+        width: 402, height: 874, borderRadius: 48, overflow: 'hidden',
+        background: '#000', padding: 10,
+        boxShadow: '0 40px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.2)',
+      }}>
+        <div style={{
+          width: '100%', height: '100%', borderRadius: 38, overflow: 'hidden',
+          background: PALETTE[tweaks.mode].paper, position: 'relative',
+        }}>
+          {/* dynamic island */}
+          <div style={{
+            position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+            width: 120, height: 34, borderRadius: 22, background: '#000', zIndex: 50,
+          }} />
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 54,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '18px 28px 0', zIndex: 10,
+            fontFamily: '-apple-system, system-ui', fontSize: 14, fontWeight: 600,
+            color: tweaks.mode === 'dark' ? '#fff' : '#000',
+          }}>
+            <span>9:41</span>
+            <span style={{ width: 120 }} />
+            <span>100%</span>
+          </div>
+          <div style={{ paddingTop: 54, height: '100%' }}>
+            <PlannerApp tweaks={tweaks} containerWidth={382} frame="mobile" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Tweaks panel
+// ─────────────────────────────────────────────────────────────
+function TweaksPanel({ tweaks, updateTweak }) {
+  const darkMode = tweaks.mode === 'dark';
+  const bg = darkMode ? '#1c1a20' : '#fff';
+  const fg = darkMode ? '#F0EDE4' : '#1C1A15';
+  const muted = darkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.55)';
+  const rule = darkMode ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)';
+
+  const Row = ({ label, children }) => (
+    <div style={{ marginBottom: 18 }}>
+      <div style={{
+        fontFamily: '"JetBrains Mono", monospace', fontSize: 9.5, letterSpacing: 0.8,
+        color: muted, textTransform: 'uppercase', marginBottom: 8,
+      }}>{label}</div>
+      {children}
+    </div>
+  );
+
+  const SegBtn = ({ active, onClick, children }) => (
+    <button onClick={onClick} style={{
+      flex: 1, border: `1px solid ${active ? fg : rule}`,
+      background: active ? fg : 'transparent',
+      color: active ? bg : fg, padding: '7px 8px', cursor: 'pointer',
+      fontFamily: 'Inter', fontSize: 11, borderRadius: 2,
+    }}>{children}</button>
+  );
+
+  return (
+    <div style={{
+      position: 'fixed', right: 20, bottom: 20, width: 280,
+      background: bg, color: fg, borderRadius: 4,
+      boxShadow: '0 20px 60px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.08)',
+      padding: 20, zIndex: 1000, maxHeight: '80vh', overflow: 'auto',
+      fontFamily: 'Inter, sans-serif',
+    }}>
+      <div style={{
+        fontFamily: '"Newsreader", serif', fontStyle: 'italic', fontSize: 22,
+        marginBottom: 4,
+      }}>Tweaks</div>
+      <div style={{
+        fontFamily: '"JetBrains Mono", monospace', fontSize: 10, color: muted,
+        letterSpacing: 0.4, marginBottom: 20, paddingBottom: 14, borderBottom: `1px solid ${rule}`,
+      }}>Shape your planner</div>
+
+      <Row label="Color theme">
+        <div style={{ display: 'flex', gap: 6 }}>
+          {Object.entries(THEMES).map(([k, th]) => (
+            <button key={k} onClick={() => updateTweak('theme', k)} title={th.name} style={{
+              flex: 1, aspectRatio: '1', background: th.accent,
+              border: tweaks.theme === k ? `2px solid ${fg}` : `1px solid ${rule}`,
+              cursor: 'pointer', borderRadius: 2, padding: 0,
+              boxShadow: tweaks.theme === k ? `0 0 0 2px ${bg}, 0 0 0 3px ${fg}` : 'none',
+            }} />
+          ))}
+        </div>
+      </Row>
+
+      <Row label="Typography">
+        <div style={{ display: 'flex', gap: 4 }}>
+          {Object.keys(TYPEFACES).map(k => (
+            <SegBtn key={k} active={tweaks.typeface === k} onClick={() => updateTweak('typeface', k)}>
+              {k === 'newsreader' ? 'Newsreader' : k === 'spectral' ? 'Spectral' : 'Sans'}
+            </SegBtn>
+          ))}
+        </div>
+      </Row>
+
+      <Row label="Mode">
+        <div style={{ display: 'flex', gap: 4 }}>
+          <SegBtn active={tweaks.mode === 'light'} onClick={() => updateTweak('mode', 'light')}>Light</SegBtn>
+          <SegBtn active={tweaks.mode === 'dark'}  onClick={() => updateTweak('mode', 'dark')}>Dark</SegBtn>
+        </div>
+      </Row>
+
+      <Row label="Density">
+        <div style={{ display: 'flex', gap: 4 }}>
+          <SegBtn active={tweaks.density === 'spacious'} onClick={() => updateTweak('density', 'spacious')}>Spacious</SegBtn>
+          <SegBtn active={tweaks.density === 'compact'}  onClick={() => updateTweak('density', 'compact')}>Compact</SegBtn>
+        </div>
+      </Row>
+
+      <Row label="Widgets on home">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+          {Object.keys(tweaks.widgets).map(k => {
+            const on = tweaks.widgets[k];
+            return (
+              <button key={k} onClick={() => updateTweak(`widgets.${k}`, !on)} style={{
+                border: `1px solid ${on ? fg : rule}`,
+                background: on ? fg : 'transparent',
+                color: on ? bg : fg, padding: '6px 8px', cursor: 'pointer',
+                fontFamily: 'Inter', fontSize: 10.5, borderRadius: 2,
+                textAlign: 'left', textTransform: 'capitalize',
+              }}>{k}</button>
+            );
+          })}
+        </div>
+      </Row>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
