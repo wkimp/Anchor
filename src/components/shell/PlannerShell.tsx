@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import AppHeader from './AppHeader'
 import AppSidebar from './AppSidebar'
 import BottomNav from './BottomNav'
@@ -14,9 +15,21 @@ interface Props {
   openTaskCount: number
 }
 
+function deriveView(pathname: string): ViewName {
+  if (pathname === '/week') return 'Week'
+  if (pathname === '/month') return 'Month'
+  if (pathname === '/upcoming') return 'All'
+  return 'Today'
+}
+
 export default function PlannerShell({ children, openTaskCount }: Props) {
-  const [view, setView] = useState<ViewName>('Today')
+  const pathname = usePathname()
+  const [view, setView] = useState<ViewName>(() => deriveView(pathname))
   const [agentOpen, setAgentOpen] = useState(false)
+
+  useEffect(() => {
+    setView(deriveView(pathname))
+  }, [pathname])
 
   return (
     <>

@@ -1,13 +1,19 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { quickAddTask } from '@/app/actions/tasks'
 import type { ViewName } from '@/lib/types'
 
 const VIEWS: ViewName[] = ['Today', 'Week', 'Month', 'All']
+const VIEW_ROUTES: Record<ViewName, string> = {
+  Today: '/',
+  Week: '/week',
+  Month: '/month',
+  All: '/upcoming',
+}
 
 interface Props {
   view: ViewName
@@ -31,6 +37,7 @@ function parseQuickAdd(text: string): { label: string; kind: 'day' | 'time' | 't
 
 export default function AppHeader({ view, onViewChange, openTaskCount }: Props) {
   const router = useRouter()
+  const pathname = usePathname()
   const demoMode = useAppStore((s) => s.demoMode)
   const [value, setValue] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -57,6 +64,14 @@ export default function AppHeader({ view, onViewChange, openTaskCount }: Props) 
       router.refresh()
     })
     setValue('')
+  }
+
+  function handleViewChange(nextView: ViewName) {
+    onViewChange(nextView)
+    const nextRoute = VIEW_ROUTES[nextView]
+    if (pathname !== nextRoute) {
+      router.push(nextRoute)
+    }
   }
 
   return (
@@ -91,7 +106,7 @@ export default function AppHeader({ view, onViewChange, openTaskCount }: Props) 
           {VIEWS.map((v) => (
             <button
               key={v}
-              onClick={() => onViewChange(v)}
+              onClick={() => handleViewChange(v)}
               className={`px-3 py-1.5 text-xs font-body uppercase tracking-[0.2px] font-medium cursor-pointer transition-colors ${
                 view === v
                   ? 'bg-ink text-paper'
