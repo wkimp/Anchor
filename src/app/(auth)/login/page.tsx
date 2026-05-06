@@ -1,33 +1,59 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [mode, setMode] = useState<'login' | 'signup'>('login')
 
   const supabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!email.trim()) return
+    if (!email.trim() || !password.trim()) return
     setLoading(true)
     setError('')
+    setMessage('')
 
     const supabase = createClient()
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    })
+    const trimmedEmail = email.trim()
 
-    if (err) {
-      setError(err.message)
+    if (mode === 'login') {
+      const { error: err } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password,
+      })
+
+      if (err) {
+        setError(err.message)
+      } else {
+        router.push('/')
+        router.refresh()
+      }
     } else {
-      setSent(true)
+      const { data, error: err } = await supabase.auth.signUp({
+        email: trimmedEmail,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      })
+
+      if (err) {
+        setError(err.message)
+      } else if (data.session) {
+        router.push('/')
+        router.refresh()
+      } else {
+        setMessage('Account created. Check your inbox to confirm your email, then sign in with your password.')
+      }
     }
+
     setLoading(false)
   }
 
@@ -60,43 +86,77 @@ export default function LoginPage() {
                 Continue in demo mode →
               </a>
             </div>
-          ) : sent ? (
-            <div className="text-center space-y-3">
-              <div className="text-2xl">✉️</div>
-              <p className="font-display text-xl italic text-ink">Check your inbox</p>
-              <p className="font-body text-sm text-ink-3">
-                We sent a magic link to <strong className="text-ink">{email}</strong>. Click it to sign in.
-              </p>
-            </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="mono-label text-ink-4 block mb-2">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  className="w-full bg-paper border border-rule rounded-sm px-3 py-2.5 font-body text-sm text-ink placeholder-ink-4 outline-none focus:border-ink transition-colors"
-                />
+            <div className="space-y-4">
+              <div className="flex gap-1 border border-rule rounded-sm p-0.5">
+                {(['login', 'signup'] as const).map((nextMode) => (
+                  <button
+                    key={nextMode}
+                    type="button"
+                    onClick={() => {
+                      setMode(nextMode)
+                      setError('')
+                      setMessage('')
+                    }}
+                    className={`flex-1 px-3 py-2 text-xs font-body uppercase tracking-[0.2px] transition-colors cursor-pointer ${
+                      mode === nextMode ? 'bg-ink text-paper' : 'text-ink-2 hover:text-ink'
+                    }`}
+                  >
+                    {nextMode === 'login' ? 'Log in' : 'Create account'}
+                  </button>
+                ))}
               </div>
-              {error && (
-                <p className="font-body text-xs text-[#B45B47]">{error}</p>
-              )}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-ink text-paper font-body text-sm py-2.5 rounded-sm disabled:opacity-50 hover:opacity-90 transition-opacity cursor-pointer"
-              >
-                {loading ? 'Sending…' : 'Send magic link'}
-              </button>
-            </form>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="mono-label text-ink-4 block mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    className="w-full bg-paper border border-rule rounded-sm px-3 py-2.5 font-body text-sm text-ink placeholder-ink-4 outline-none focus:border-ink transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="mono-label text-ink-4 block mb-2">Password</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                    minLength={8}
+                    className="w-full bg-paper border border-rule rounded-sm px-3 py-2.5 font-body text-sm text-ink placeholder-ink-4 outline-none focus:border-ink transition-colors"
+                  />
+                </div>
+
+                {error && (
+                  <p className="font-body text-xs text-[#B45B47]">{error}</p>
+                )}
+
+                {message && (
+                  <p className="font-body text-xs text-ink-3">{message}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-ink text-paper font-body text-sm py-2.5 rounded-sm disabled:opacity-50 hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  {loading
+                    ? (mode === 'login' ? 'Logging in…' : 'Creating account…')
+                    : (mode === 'login' ? 'Log in' : 'Create account')}
+                </button>
+              </form>
+            </div>
           )}
         </div>
 
         <p className="mono-label text-ink-4 text-center mt-8">
-          No password. No friction. Just a link.
+          {mode === 'login' ? 'Sign in with your email and password.' : 'Create an account with email and password.'}
         </p>
       </div>
     </div>
