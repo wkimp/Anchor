@@ -12,6 +12,53 @@ npm run dev
 
 Visit http://localhost:3000 — works in demo mode without any keys.
 
+## Deploy on Vercel
+
+This app is a full-stack Next.js project, so Vercel is the simplest production host.
+
+### 1. Import the repo
+
+- Push this repository to GitHub.
+- In Vercel, choose `Add New Project`.
+- Import the GitHub repo.
+- Let Vercel auto-detect Next.js.
+
+### 2. Set environment variables
+
+Add these in Vercel for Production, Preview, and Development as needed:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+ANTHROPIC_API_KEY=
+NEXT_PUBLIC_SITE_URL=
+```
+
+Set `NEXT_PUBLIC_SITE_URL` to your deployed app URL, for example:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://your-app.vercel.app
+```
+
+### 3. Configure Supabase Auth
+
+In Supabase:
+
+- Set `Site URL` to your production app URL.
+- Add redirect URLs for:
+  - `https://your-app.vercel.app/auth/callback`
+  - `https://your-preview-url.vercel.app/auth/callback` if you want preview auth to work
+  - `http://localhost:3000/auth/callback` for local development
+
+### 4. Deploy
+
+Use the default Vercel settings:
+
+- Install Command: `npm ci`
+- Build Command: `npm run build`
+
+The app also works in demo mode without any keys, but authentication, database features, and the AI agent need the corresponding environment variables.
+
 ## Setup details
 
 ```bash
