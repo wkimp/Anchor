@@ -10,6 +10,18 @@ import type { Task, Habit, HabitLog, WellnessLog } from '@/lib/types'
 export async function POST(request: Request) {
   const body = await request.json() as { messages: Array<{ role: string; content: string }>; demoMode?: boolean }
 
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } },
+      )
+    }
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return new Response(
       JSON.stringify({ error: 'ANTHROPIC_API_KEY not set' }),

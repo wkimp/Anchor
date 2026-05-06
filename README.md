@@ -30,6 +30,7 @@ Add these in Vercel for Production, Preview, and Development as needed:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 ANTHROPIC_API_KEY=
 NEXT_PUBLIC_SITE_URL=
 ```
@@ -58,6 +59,7 @@ Use the default Vercel settings:
 - Build Command: `npm run build`
 
 The app also works in demo mode without any keys, but authentication, database features, and the AI agent need the corresponding environment variables.
+`SUPABASE_SERVICE_ROLE_KEY` is required only for permanent account deletion from the Settings page and must be kept server-side only.
 
 ## Setup details
 
