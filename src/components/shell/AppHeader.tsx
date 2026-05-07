@@ -12,7 +12,7 @@ const VIEW_ROUTES: Record<ViewName, string> = {
   Today: '/',
   Week: '/week',
   Month: '/month',
-  All: '/upcoming',
+  All: '/all',
 }
 
 interface Props {

@@ -18,7 +18,7 @@ interface Props {
 function deriveView(pathname: string): ViewName {
   if (pathname === '/week') return 'Week'
   if (pathname === '/month') return 'Month'
-  if (pathname === '/upcoming') return 'All'
+  if (pathname === '/all') return 'All'
   return 'Today'
 }
 
