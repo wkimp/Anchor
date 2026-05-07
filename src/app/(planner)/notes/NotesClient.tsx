@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, X, StickyNote, Pencil } from 'lucide-react'
 import PageShell, { SectionTitle } from '@/components/ui/PageShell'
+import InlineStatus from '@/components/ui/InlineStatus'
 import { createNote, deleteNote, updateNote } from '@/app/actions/notes'
 import type { Note } from '@/lib/types'
 
@@ -17,6 +18,7 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [tag, setTag] = useState('work')
+  const [message, setMessage] = useState('')
   const [isPending, startTransition] = useTransition()
 
   function handleCreate(e: React.FormEvent) {
@@ -29,6 +31,7 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
     }
     setNotes((n) => [optimistic, ...n])
     const t = title; const b = body; const tg = tag
+    setMessage('Note added.')
     setCreating(false); setTitle(''); setBody(''); setTag('work')
     startTransition(async () => { await createNote(t, b, tg); router.refresh() })
   }
@@ -39,6 +42,7 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
     setTitle(note.title)
     setBody(note.body)
     setTag(note.tag)
+    setMessage('')
   }
 
   function resetComposer() {
@@ -67,6 +71,7 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
     const nextTitle = title
     const nextBody = body
     const nextTag = tag
+    setMessage('Note updated.')
     resetComposer()
     startTransition(async () => {
       await updateNote(noteId, nextTitle, nextBody, nextTag)
@@ -76,6 +81,7 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
 
   function handleDelete(id: string) {
     setNotes((n) => n.filter((x) => x.id !== id))
+    setMessage('Note removed.')
     startTransition(async () => { await deleteNote(id); router.refresh() })
   }
 
@@ -92,6 +98,7 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
             }
             setCreating(true)
             setEditingId(null)
+            setMessage('')
           }}
           className="flex items-center gap-1.5 border border-rule bg-card text-ink-2 font-body text-xs px-3 py-2 rounded-sm hover:text-ink transition-colors cursor-pointer"
         >
@@ -132,6 +139,13 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
             </div>
           </form>
         </div>
+      )}
+
+      {(message || isPending) && (
+        <InlineStatus
+          tone={isPending ? 'info' : 'success'}
+          message={isPending ? 'Saving your note changes…' : message}
+        />
       )}
 
       <SectionTitle>All notes</SectionTitle>

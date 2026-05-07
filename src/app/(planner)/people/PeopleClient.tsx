@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import PageShell, { EmptyState, SectionTitle } from '@/components/ui/PageShell'
+import InlineStatus from '@/components/ui/InlineStatus'
 import { createPerson, deletePerson, updatePerson } from '@/app/actions/people'
 import type { Person } from '@/lib/types'
 
@@ -160,7 +161,12 @@ export function PeoplePageClient({ people: initialPeople }: { people: Person[] }
         />
       )}
 
-      {message && <p className="mb-4 font-body text-xs text-ink-3">{message}</p>}
+      {(message || isPending) && (
+        <InlineStatus
+          tone={isPending ? 'info' : 'success'}
+          message={isPending ? 'Updating your contact list…' : message}
+        />
+      )}
 
       <div className="mb-6 grid grid-cols-2 gap-[var(--gap)] xl:grid-cols-4">
         <StatCard label="Overdue" big={String(overdue.length)} sub={overdue.map((p) => p.name).join(', ') || 'none'} />

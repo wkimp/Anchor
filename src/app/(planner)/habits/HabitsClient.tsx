@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import PageShell, { EmptyState, SectionTitle } from '@/components/ui/PageShell'
+import InlineStatus from '@/components/ui/InlineStatus'
 import HabitsWidget from '@/components/widgets/HabitsWidget'
 import { createHabit, deleteHabit, updateHabit } from '@/app/actions/habits'
 import type { Habit, HabitLog } from '@/lib/types'
@@ -135,7 +136,12 @@ export function HabitsPageClient({
         />
       )}
 
-      {message && <p className="mb-4 font-body text-xs text-ink-3">{message}</p>}
+      {(message || isPending) && (
+        <InlineStatus
+          tone={isPending ? 'info' : 'success'}
+          message={isPending ? 'Refreshing habit progress…' : message}
+        />
+      )}
 
       <div className="mb-6 grid grid-cols-2 gap-[var(--gap)] xl:grid-cols-4">
         <StatCard label="Tracked" big={String(habits.length)} sub="habits in rotation" />

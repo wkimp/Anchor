@@ -3,6 +3,7 @@
 import { useState, useTransition, useOptimistic } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckSquare, Check, Trash2 } from 'lucide-react'
+import InlineStatus from '@/components/ui/InlineStatus'
 import Widget from '@/components/ui/Widget'
 import { createTask, toggleTask, deleteTask } from '@/app/actions/tasks'
 import type { Task, Priority } from '@/lib/types'
@@ -22,6 +23,7 @@ export default function TasksWidget({ tasks }: Props) {
   const [draft, setDraft] = useState('')
   const [draftProject, setDraftProject] = useState('Inbox')
   const [draftPriority, setDraftPriority] = useState<Priority>(2)
+  const [message, setMessage] = useState('')
   const [isPending, startTransition] = useTransition()
 
   const [optimisticTasks, updateOptimistic] = useOptimistic(
@@ -41,6 +43,7 @@ export default function TasksWidget({ tasks }: Props) {
   const doneCount = optimisticTasks.filter((t) => t.done).length
 
   function handleToggle(task: Task) {
+    setMessage(task.done ? 'Task marked open again.' : 'Task completed.')
     startTransition(async () => {
       updateOptimistic({ id: task.id, done: !task.done })
       await toggleTask(task.id, !task.done)
@@ -49,6 +52,7 @@ export default function TasksWidget({ tasks }: Props) {
   }
 
   function handleDelete(taskId: string) {
+    setMessage('Task removed.')
     startTransition(async () => {
       await deleteTask(taskId)
       router.refresh()
@@ -66,6 +70,7 @@ export default function TasksWidget({ tasks }: Props) {
     setDraft('')
     setDraftProject('Inbox')
     setDraftPriority(2)
+    setMessage('Task added.')
 
     startTransition(async () => {
       await createTask({
@@ -83,6 +88,13 @@ export default function TasksWidget({ tasks }: Props) {
       title="Tasks"
       subtitle={`${openCount} open · ${doneCount} done`}
     >
+      {(message || isPending) && (
+        <InlineStatus
+          tone={isPending ? 'info' : 'success'}
+          message={isPending ? 'Saving task changes…' : message}
+        />
+      )}
+
       <form onSubmit={handleCreate} className="mb-3 rounded-sm border border-rule bg-paper-alt/70 p-3">
         <div className="flex items-center gap-2">
           <input

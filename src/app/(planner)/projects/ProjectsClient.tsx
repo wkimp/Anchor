@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import PageShell, { EmptyState } from '@/components/ui/PageShell'
+import InlineStatus from '@/components/ui/InlineStatus'
 import { createProject, deleteProject, updateProject } from '@/app/actions/projects'
 import type { Project } from '@/lib/types'
 
@@ -157,8 +158,11 @@ export function ProjectsPageClient({ projects: initialProjects }: { projects: Pr
         />
       )}
 
-      {message && (
-        <p className="mb-4 font-body text-xs text-ink-3">{message}</p>
+      {(message || isPending) && (
+        <InlineStatus
+          tone={isPending ? 'info' : 'success'}
+          message={isPending ? 'Updating project details…' : message}
+        />
       )}
 
       {rows.length === 0 ? (
