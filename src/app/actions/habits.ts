@@ -3,6 +3,12 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
+function revalidateHabitSurfaces() {
+  revalidatePath('/')
+  revalidatePath('/all')
+  revalidatePath('/habits')
+}
+
 export async function toggleHabit(habitId: string, date: string, done: boolean) {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
 
@@ -16,8 +22,7 @@ export async function toggleHabit(habitId: string, date: string, done: boolean) 
     { onConflict: 'user_id,habit_id,date' },
   )
 
-  revalidatePath('/')
-  revalidatePath('/habits')
+  revalidateHabitSurfaces()
 }
 
 export async function createHabit(name: string, icon: string) {
@@ -28,7 +33,23 @@ export async function createHabit(name: string, icon: string) {
   if (!user) return
 
   await supabase.from('habits').insert({ user_id: user.id, name, icon })
-  revalidatePath('/habits')
+  revalidateHabitSurfaces()
+}
+
+export async function updateHabit(habitId: string, name: string, icon: string) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  await supabase
+    .from('habits')
+    .update({ name, icon })
+    .eq('id', habitId)
+    .eq('user_id', user.id)
+
+  revalidateHabitSurfaces()
 }
 
 export async function deleteHabit(habitId: string) {
@@ -39,5 +60,5 @@ export async function deleteHabit(habitId: string) {
   if (!user) return
 
   await supabase.from('habits').delete().eq('id', habitId).eq('user_id', user.id)
-  revalidatePath('/habits')
+  revalidateHabitSurfaces()
 }
