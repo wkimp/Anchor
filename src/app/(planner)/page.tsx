@@ -62,7 +62,7 @@ export default async function TodayPage() {
           Hello {greetingName}
         </h1>
         <p className="mt-3 text-sm text-ink-3 sm:text-base">
-          Let&apos;s Anchor Your Life Today!
+          Stay anchored. Drift Less. Do more.
         </p>
       </section>
 
