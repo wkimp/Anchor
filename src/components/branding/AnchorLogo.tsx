@@ -37,7 +37,7 @@ export default function AnchorLogo({
         width={1152}
         height={768}
         priority={size === 'auth'}
-        className="h-auto w-full"
+        className="h-auto w-full mix-blend-multiply"
       />
       {subtitle && (
         <p className={`mono-label text-ink-4 ${SIZE_CLASSES[size].subtitle}`}>
