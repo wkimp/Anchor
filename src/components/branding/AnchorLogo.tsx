@@ -10,15 +10,15 @@ interface Props {
 
 const SIZE_CLASSES = {
   auth: {
-    wrap: 'mx-auto w-[260px] sm:w-[320px]',
+    wrap: 'mx-auto w-[290px] sm:w-[360px]',
     subtitle: 'mt-4 text-center',
   },
   sidebar: {
-    wrap: 'w-[140px]',
+    wrap: 'w-[158px]',
     subtitle: 'mt-3',
   },
   header: {
-    wrap: 'w-[150px] sm:w-[170px]',
+    wrap: 'w-[170px] sm:w-[192px]',
     subtitle: 'mt-3',
   },
 }
