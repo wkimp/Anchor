@@ -1,26 +1,70 @@
 import { createClient } from '@/lib/supabase/server'
-import { DEMO_TASKS, DEMO_SCHEDULE } from '@/lib/demo-data'
-import PageShell, { SectionTitle } from '@/components/ui/PageShell'
-import type { Task, ScheduleBlock } from '@/lib/types'
+import { DEMO_SCHEDULE, DEMO_TASKS } from '@/lib/demo-data'
+import PageShell from '@/components/ui/PageShell'
+import type { ScheduleBlock, Task } from '@/lib/types'
 
-function getDaysInMonth(year: number, month: number) {
-  return new Date(year, month + 1, 0).getDate()
+function getMonthGrid(year: number, month: number) {
+  const first = new Date(year, month, 1)
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const firstOffset = (first.getDay() + 6) % 7
+  const cells: Array<{ num: number; muted: boolean; monthLabel: 'prev' | 'current' | 'next' }> = []
+
+  const prevMonthDays = new Date(year, month, 0).getDate()
+  for (let i = 0; i < firstOffset; i++) {
+    cells.push({ num: prevMonthDays - firstOffset + i + 1, muted: true, monthLabel: 'prev' })
+  }
+
+  for (let i = 1; i <= daysInMonth; i++) {
+    cells.push({ num: i, muted: false, monthLabel: 'current' })
+  }
+
+  while (cells.length % 7 !== 0) {
+    cells.push({ num: cells.length - daysInMonth - firstOffset + 1, muted: true, monthLabel: 'next' })
+  }
+
+  while (cells.length < 42) {
+    cells.push({ num: cells.length - daysInMonth - firstOffset + 1, muted: true, monthLabel: 'next' })
+  }
+
+  return { cells, daysInMonth }
 }
 
-function getFirstDayOfMonth(year: number, month: number) {
-  return new Date(year, month, 1).getDay() // 0=Sun
+function isoForCell(year: number, month: number, cell: { num: number; muted: boolean; monthLabel: 'prev' | 'current' | 'next' }) {
+  if (cell.monthLabel === 'current') {
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(cell.num).padStart(2, '0')}`
+  }
+  if (cell.monthLabel === 'prev') {
+    const date = new Date(year, month - 1, cell.num)
+    return date.toISOString().split('T')[0]
+  }
+  const date = new Date(year, month + 1, cell.num)
+  return date.toISOString().split('T')[0]
+}
+
+function formatMonthTitle(date: Date) {
+  return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+}
+
+type Marker = {
+  label: string
+  kind: 'deadline' | 'work' | 'social' | 'health'
+}
+
+function markerKindClass(kind: Marker['kind']) {
+  if (kind === 'deadline') return 'bg-[#B45B47]'
+  if (kind === 'work') return 'bg-accent'
+  if (kind === 'health') return 'bg-[#8E6C3C]'
+  return 'bg-ink-3'
 }
 
 export default async function MonthPage() {
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth()
-  const todayDate = now.getDate()
-  const todayISO = now.toISOString().split('T')[0]
-
+  const todayIso = now.toISOString().split('T')[0]
   const monthStart = `${year}-${String(month + 1).padStart(2, '0')}-01`
-  const daysInMonth = getDaysInMonth(year, month)
-  const monthEnd = `${year}-${String(month + 1).padStart(2, '0')}-${daysInMonth}`
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const monthEnd = `${year}-${String(month + 1).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`
 
   let tasks: Task[] = DEMO_TASKS
   let blocks: ScheduleBlock[] = DEMO_SCHEDULE
@@ -30,100 +74,150 @@ export default async function MonthPage() {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const [t, b] = await Promise.all([
-          supabase.from('tasks').select('*').eq('user_id', user.id).gte('due_date', monthStart).lte('due_date', monthEnd),
-          supabase.from('schedule_blocks').select('*').eq('user_id', user.id).gte('start_ts', `${monthStart}T00:00:00`).lte('start_ts', `${monthEnd}T23:59:59`),
+        const [taskResult, blockResult] = await Promise.all([
+          supabase
+            .from('tasks')
+            .select('*')
+            .eq('user_id', user.id)
+            .gte('due_date', monthStart)
+            .lte('due_date', monthEnd)
+            .order('due_date'),
+          supabase
+            .from('schedule_blocks')
+            .select('*')
+            .eq('user_id', user.id)
+            .gte('start_ts', `${monthStart}T00:00:00`)
+            .lte('start_ts', `${monthEnd}T23:59:59`)
+            .order('start_ts'),
         ])
-        if (t.data) tasks = t.data as Task[]
-        if (b.data) blocks = b.data as ScheduleBlock[]
+
+        if (taskResult.data) tasks = taskResult.data as Task[]
+        if (blockResult.data) blocks = blockResult.data as ScheduleBlock[]
       }
-    } catch { /* use demo */ }
+    } catch {
+      // fall back to demo data
+    }
   }
 
-  const firstDay = getFirstDayOfMonth(year, month)
-  const blanks = firstDay === 0 ? 6 : firstDay - 1 // start on Monday
-  const totalCells = blanks + daysInMonth
-  const rows = Math.ceil(totalCells / 7)
+  const { cells } = getMonthGrid(year, month)
 
-  const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  const markersByDay = new Map<string, Marker[]>()
 
-  // Upcoming deadlines (tasks with due dates this month)
-  const deadlines = tasks.filter((t) => t.due_date && !t.done)
+  tasks.forEach((task) => {
+    if (!task.due_date) return
+    const kind: Marker['kind'] = task.priority === 1 ? 'deadline' : task.project === 'Health' ? 'health' : task.project === 'Business' ? 'work' : 'social'
+    const current = markersByDay.get(task.due_date) ?? []
+    current.push({ label: task.text, kind })
+    markersByDay.set(task.due_date, current)
+  })
+
+  blocks.forEach((block) => {
+    const date = block.start_ts.split('T')[0]
+    const current = markersByDay.get(date) ?? []
+    const kind: Marker['kind'] = block.kind === 'meeting' || block.kind === 'focus' ? 'work' : block.kind === 'wellness' ? 'health' : 'social'
+    current.push({ label: block.title, kind })
+    markersByDay.set(date, current)
+  })
+
+  const deadlines = tasks
+    .filter((task) => task.due_date && !task.done)
     .sort((a, b) => (a.due_date ?? '').localeCompare(b.due_date ?? ''))
 
   return (
-    <PageShell title={monthName} subtitle="month view">
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-6">
-        {/* Calendar grid */}
-        <div className="bg-card border border-rule rounded-sm overflow-hidden">
-          {/* Day headers */}
-          <div className="grid grid-cols-7 border-b border-rule">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
-              <div key={d} className="px-2 py-2 text-center font-mono text-[9px] text-ink-4 uppercase tracking-[0.3px]">
-                {d}
-              </div>
-            ))}
-          </div>
-
-          {/* Day cells */}
-          <div className="grid grid-cols-7">
-            {Array.from({ length: rows * 7 }, (_, i) => {
-              const dayNum = i - blanks + 1
-              const isValid = dayNum >= 1 && dayNum <= daysInMonth
-              const iso = isValid ? `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}` : ''
-              const isToday = iso === todayISO
-              const dayTasks = isValid ? tasks.filter((t) => t.due_date === iso) : []
-              const dayBlocks = isValid ? blocks.filter((b) => b.start_ts.startsWith(iso)) : []
-              const dots = dayTasks.length + dayBlocks.length
-
-              return (
-                <div
-                  key={i}
-                  className={`min-h-[72px] p-1.5 border-b border-r border-rule-2 last-of-type:border-b-0 ${isValid ? '' : 'opacity-20'} ${isToday ? 'bg-accent-soft/30' : ''}`}
-                >
-                  {isValid && (
-                    <>
-                      <span className={`font-mono text-xs ${isToday ? 'text-accent font-bold' : 'text-ink-3'}`}>
-                        {dayNum}
-                      </span>
-                      {dots > 0 && (
-                        <div className="flex gap-0.5 mt-1 flex-wrap">
-                          {dayBlocks.slice(0, 2).map((b, bi) => (
-                            <span key={bi} className="w-1.5 h-1.5 rounded-full bg-ink" title={b.title} />
-                          ))}
-                          {dayTasks.slice(0, 3).map((t, ti) => (
-                            <span key={ti} className="w-1.5 h-1.5 rounded-full bg-accent" title={t.text} />
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Deadline list */}
+    <PageShell title={formatMonthTitle(now)} subtitle="month view">
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6">
         <div>
-          <SectionTitle>Deadlines this month</SectionTitle>
-          <div className="bg-card border border-rule rounded-sm divide-y divide-rule-2">
-            {deadlines.length === 0 && (
-              <p className="font-body text-sm text-ink-4 italic p-4 text-center">No deadlines.</p>
-            )}
-            {deadlines.map((task) => (
-              <div key={task.id} className="px-3 py-2.5">
-                <p className="font-body text-sm text-ink truncate">{task.text}</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="font-mono text-[10px] text-ink-4">{task.due_date}</span>
-                  <span className="font-mono text-[9px] text-ink-4 bg-paper-alt px-1.5 py-0.5 rounded-sm uppercase tracking-[0.3px]">
-                    {task.project}
-                  </span>
+          <div className="bg-card border border-rule overflow-hidden">
+            <div className="grid grid-cols-7 border-b border-rule">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                <div key={day} className="px-3 py-2 font-mono text-[9.5px] uppercase tracking-[0.45px] text-ink-4 text-center">
+                  {day}
                 </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7">
+              {cells.map((cell, index) => {
+                const iso = isoForCell(year, month, cell)
+                const markers = markersByDay.get(iso) ?? []
+                const isToday = iso === todayIso
+                const visible = markers.slice(0, 2)
+                const hiddenCount = Math.max(0, markers.length - 2)
+
+                return (
+                  <div
+                    key={`${cell.monthLabel}-${cell.num}-${index}`}
+                    className={`min-h-[96px] p-2 border-r border-t border-rule relative ${((index + 1) % 7 === 0) ? 'border-r-0' : ''} ${cell.muted ? 'opacity-35' : ''} ${isToday ? 'bg-paper-alt' : ''}`}
+                  >
+                    <div className={`font-display italic leading-none mb-1 ${isToday ? 'text-accent text-[18px]' : 'text-ink text-[15px]'}`}>
+                      {cell.num}
+                      {isToday && (
+                        <svg width="24" height="6" viewBox="0 0 24 6" className="block mt-1">
+                          <path d="M1 3 Q 6 1, 12 3 T 23 3" stroke="var(--accent)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+                        </svg>
+                      )}
+                    </div>
+
+                    {visible.map((marker, markerIndex) => (
+                      <div key={`${marker.label}-${markerIndex}`} className="flex items-center gap-1 mb-1">
+                        <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${markerKindClass(marker.kind)}`} />
+                        <div className="font-body text-[10px] text-ink-2 truncate">{marker.label}</div>
+                      </div>
+                    ))}
+
+                    {hiddenCount > 0 && (
+                      <div className="font-mono text-[9px] text-ink-3 mt-1">+{hiddenCount} more</div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-5 font-mono text-[10px] uppercase tracking-[0.4px] text-ink-3">
+            {[
+              { label: 'work', kind: 'work' as const },
+              { label: 'deadline', kind: 'deadline' as const },
+              { label: 'social', kind: 'social' as const },
+              { label: 'health', kind: 'health' as const },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-2">
+                <div className={`w-1.5 h-1.5 rounded-full ${markerKindClass(item.kind)}`} />
+                <span>{item.label}</span>
               </div>
             ))}
           </div>
         </div>
+
+        <aside className="space-y-4">
+          <div className="bg-card border border-rule p-4">
+            <p className="mono-label text-ink-4 mb-3">Deadlines this month</p>
+            <div className="space-y-3">
+              {deadlines.length === 0 && (
+                <p className="font-body text-sm text-ink-4 italic">No deadlines this month.</p>
+              )}
+
+              {deadlines.map((task) => (
+                <div key={task.id} className="pb-3 border-b border-dashed border-rule last:border-b-0 last:pb-0">
+                  <p className="font-body text-sm text-ink">{task.text}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="font-mono text-[10px] text-ink-4">{task.due_date}</span>
+                    <span className="font-mono text-[9px] uppercase tracking-[0.35px] text-ink-4 bg-paper-alt px-1.5 py-0.5 rounded-sm">
+                      {task.project}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-card border border-rule p-4">
+            <p className="mono-label text-ink-4 mb-2">Month notes</p>
+            <p className="font-display italic text-lg text-ink leading-snug">
+              A slower month, but several sharp edges. Protect the business deadlines and keep the rest spacious.
+            </p>
+          </div>
+        </aside>
       </div>
     </PageShell>
   )
