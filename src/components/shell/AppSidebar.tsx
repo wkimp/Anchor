@@ -75,7 +75,7 @@ export default function AppSidebar({ openTaskCount }: Props) {
       aria-label="Main navigation"
     >
       <div className="mb-6 px-5">
-        <AnchorLogo size="sidebar" href="/" subtitle="Drift Less. Do more." />
+        <AnchorLogo size="sidebar" href="/" />
       </div>
 
       {NAV_SECTIONS.map((section, index) => (

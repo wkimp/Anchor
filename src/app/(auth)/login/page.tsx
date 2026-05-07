@@ -101,10 +101,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Wordmark */}
         <div className="mb-10 text-center">
-          <AnchorLogo
-            size="auth"
-            subtitle="Drift Less. Do more."
-          />
+          <AnchorLogo size="auth" />
         </div>
 
         {/* Card */}
