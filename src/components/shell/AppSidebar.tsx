@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import AnchorLogo from '@/components/branding/AnchorLogo'
 import {
   Sparkles, Calendar, ArrowRight, Moon,
   Briefcase, Folder, Users, Home, Heart,
@@ -63,6 +62,11 @@ interface Props {
 
 export default function AppSidebar({ openTaskCount }: Props) {
   const pathname = usePathname()
+  const now = new Date()
+  const month = now.toLocaleDateString('en-US', { month: 'long' })
+  const day = now.getDate()
+  const weekday = now.toLocaleDateString('en-US', { weekday: 'long' })
+  const weekNum = Math.ceil((now.getDate() + new Date(now.getFullYear(), now.getMonth(), 1).getDay()) / 7)
 
   function isActive(href: string) {
     if (href === '/') return pathname === '/'
@@ -75,7 +79,26 @@ export default function AppSidebar({ openTaskCount }: Props) {
       aria-label="Main navigation"
     >
       <div className="mb-6 px-5">
-        <AnchorLogo size="sidebar" href="/" />
+        <p className="mono-label mb-1.5 text-ink-3">
+          {weekday.toUpperCase()} · WEEK {weekNum}
+        </p>
+        <div className="relative inline-block font-display text-[34px] italic leading-none tracking-[-0.6px] text-ink">
+          {month} {day}
+          <svg
+            viewBox="0 0 100 8"
+            preserveAspectRatio="none"
+            className="absolute left-0 -bottom-1 w-full"
+            style={{ height: 6 }}
+          >
+            <path
+              d="M1 5 Q 25 1, 50 4 T 99 4"
+              stroke="var(--accent)"
+              strokeWidth="1.2"
+              fill="none"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
       </div>
 
       {NAV_SECTIONS.map((section, index) => (

@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 interface Props {
-  size?: 'auth' | 'sidebar'
+  size?: 'auth' | 'sidebar' | 'header'
   subtitle?: string
   href?: string
   className?: string
@@ -15,6 +15,10 @@ const SIZE_CLASSES = {
   },
   sidebar: {
     wrap: 'w-[140px]',
+    subtitle: 'mt-3',
+  },
+  header: {
+    wrap: 'w-[150px] sm:w-[170px]',
     subtitle: 'mt-3',
   },
 }

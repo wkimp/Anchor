@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
+import AnchorLogo from '@/components/branding/AnchorLogo'
 import { useAppStore } from '@/lib/store'
 import { quickAddTask } from '@/app/actions/tasks'
 import type { ViewName } from '@/lib/types'
@@ -78,9 +79,13 @@ export default function AppHeader({ view, onViewChange, openTaskCount, greetingN
   return (
     <header className="border-b border-rule bg-paper px-[var(--pad)] pt-[22px] pb-[16px] flex-shrink-0 sm:pt-[26px] sm:pb-[18px]">
       <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
-        {/* Date */}
+        {/* Brand / date */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-8">
-          <div>
+          <div className="hidden lg:block">
+            <AnchorLogo size="header" href="/" />
+          </div>
+
+          <div className="lg:hidden">
             <p className="mono-label mb-1.5 text-ink-3 sm:mb-2">
               {weekday.toUpperCase()} · WEEK {weekNum}
             </p>
@@ -104,7 +109,7 @@ export default function AppHeader({ view, onViewChange, openTaskCount, greetingN
           </div>
 
           {view === 'Today' && (
-            <div className="max-w-[520px] pb-0.5 sm:pb-1">
+            <div className="max-w-[520px] pb-0.5 sm:pb-1 lg:pl-1">
               <h2 className="font-display text-[28px] italic leading-none tracking-[-0.5px] text-ink sm:text-[36px]">
                 Hello {greetingName}
               </h2>
