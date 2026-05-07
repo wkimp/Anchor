@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, X, StickyNote } from 'lucide-react'
+import { Plus, X, StickyNote, Pencil } from 'lucide-react'
 import PageShell, { SectionTitle } from '@/components/ui/PageShell'
-import { createNote, deleteNote } from '@/app/actions/notes'
+import { createNote, deleteNote, updateNote } from '@/app/actions/notes'
 import type { Note } from '@/lib/types'
 
 const TAGS = ['work', 'home', 'journal', 'ideas', 'other']
@@ -13,6 +13,7 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
   const router = useRouter()
   const [notes, setNotes] = useState<Note[]>(initialNotes)
   const [creating, setCreating] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [tag, setTag] = useState('work')
@@ -32,6 +33,47 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
     startTransition(async () => { await createNote(t, b, tg); router.refresh() })
   }
 
+  function beginEdit(note: Note) {
+    setCreating(true)
+    setEditingId(note.id)
+    setTitle(note.title)
+    setBody(note.body)
+    setTag(note.tag)
+  }
+
+  function resetComposer() {
+    setCreating(false)
+    setEditingId(null)
+    setTitle('')
+    setBody('')
+    setTag('work')
+  }
+
+  function handleSave(e: React.FormEvent) {
+    e.preventDefault()
+    if (!title.trim()) return
+
+    if (!editingId) {
+      handleCreate(e)
+      return
+    }
+
+    setNotes((current) =>
+      current.map((note) =>
+        note.id === editingId ? { ...note, title, body, tag, updated_at: new Date().toISOString() } : note,
+      ),
+    )
+    const noteId = editingId
+    const nextTitle = title
+    const nextBody = body
+    const nextTag = tag
+    resetComposer()
+    startTransition(async () => {
+      await updateNote(noteId, nextTitle, nextBody, nextTag)
+      router.refresh()
+    })
+  }
+
   function handleDelete(id: string) {
     setNotes((n) => n.filter((x) => x.id !== id))
     startTransition(async () => { await deleteNote(id); router.refresh() })
@@ -43,16 +85,23 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
       subtitle={`${notes.length} captured`}
       action={
         <button
-          onClick={() => setCreating(true)}
+          onClick={() => {
+            if (creating && !editingId) {
+              resetComposer()
+              return
+            }
+            setCreating(true)
+            setEditingId(null)
+          }}
           className="flex items-center gap-1.5 border border-rule bg-card text-ink-2 font-body text-xs px-3 py-2 rounded-sm hover:text-ink transition-colors cursor-pointer"
         >
-          <Plus size={13} /> New note
+          <Plus size={13} /> {creating && !editingId ? 'Close' : 'New note'}
         </button>
       }
     >
       {creating && (
         <div className="bg-card border border-rule rounded-sm p-5 mb-[var(--gap)]">
-          <form onSubmit={handleCreate} className="space-y-3">
+          <form onSubmit={handleSave} className="space-y-3">
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -77,8 +126,8 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
                 ))}
               </div>
               <div className="ml-auto flex gap-2">
-                <button type="button" onClick={() => setCreating(false)} className="font-body text-xs text-ink-3 hover:text-ink cursor-pointer">Cancel</button>
-                <button type="submit" disabled={isPending} className="font-body text-xs bg-ink text-paper px-3 py-1.5 rounded-sm cursor-pointer hover:opacity-90 disabled:opacity-50">Save</button>
+                <button type="button" onClick={resetComposer} className="font-body text-xs text-ink-3 hover:text-ink cursor-pointer">Cancel</button>
+                <button type="submit" disabled={isPending} className="font-body text-xs bg-ink text-paper px-3 py-1.5 rounded-sm cursor-pointer hover:opacity-90 disabled:opacity-50">{editingId ? 'Save changes' : 'Save'}</button>
               </div>
             </div>
           </form>
@@ -89,10 +138,20 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[var(--gap)]">
         {notes.map((note) => (
           <div key={note.id} className="bg-card border border-rule rounded-sm p-4 group relative">
-            <button onClick={() => handleDelete(note.id)}
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-ink-4 hover:text-ink transition-all cursor-pointer">
-              <X size={12} />
-            </button>
+            <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+              <button
+                onClick={() => beginEdit(note)}
+                className="text-ink-4 hover:text-ink cursor-pointer"
+                aria-label="Edit note"
+              >
+                <Pencil size={12} />
+              </button>
+              <button onClick={() => handleDelete(note.id)}
+                className="text-ink-4 hover:text-ink cursor-pointer"
+                aria-label="Delete note">
+                <X size={12} />
+              </button>
+            </div>
             <h3 className="font-body text-sm font-medium text-ink mb-1 pr-4">{note.title}</h3>
             <p className="font-body text-xs text-ink-3 line-clamp-3 leading-relaxed">{note.body}</p>
             <div className="flex items-center justify-between mt-3 pt-2 border-t border-rule-2">

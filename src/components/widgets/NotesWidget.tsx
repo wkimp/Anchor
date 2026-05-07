@@ -11,7 +11,19 @@ export default function NotesWidget({ notes }: Props) {
   const recent = notes.slice(0, 3)
 
   return (
-    <Widget icon={<StickyNote size={14} />} title="Notes" subtitle={`${notes.length} total`}>
+    <Widget
+      icon={<StickyNote size={14} />}
+      title="Notes"
+      subtitle={`${notes.length} total`}
+      action={(
+        <Link
+          href="/notes"
+          className="rounded-sm border border-rule bg-paper-alt px-2 py-1 font-mono text-[10px] uppercase tracking-[0.3px] text-ink-3 transition-colors hover:text-ink"
+        >
+          Open
+        </Link>
+      )}
+    >
       <div className="space-y-2">
         {recent.map((note) => (
           <Link
@@ -36,7 +48,18 @@ export default function NotesWidget({ notes }: Props) {
           </Link>
         ))}
         {notes.length === 0 && (
-          <p className="font-body text-sm text-ink-4 italic py-2 text-center">No notes yet.</p>
+          <div className="rounded-sm border border-dashed border-rule bg-paper-alt/35 px-4 py-5 text-center">
+            <p className="font-display text-base italic text-ink-3">No notes yet.</p>
+            <p className="mt-1 font-body text-xs leading-relaxed text-ink-4">
+              Capture a thought, a quote, or something you do not want to lose.
+            </p>
+            <Link
+              href="/notes"
+              className="mt-3 inline-flex rounded-sm border border-ink bg-ink px-2.5 py-1.5 font-body text-[11px] text-paper transition-opacity hover:opacity-90"
+            >
+              Write a note
+            </Link>
+          </div>
         )}
       </div>
       {notes.length > 3 && (

@@ -4,6 +4,14 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { Priority } from '@/lib/types'
 
+function revalidateTaskSurfaces() {
+  revalidatePath('/')
+  revalidatePath('/all')
+  revalidatePath('/week')
+  revalidatePath('/month')
+  revalidatePath('/upcoming')
+}
+
 function parsePriority(text: string): Priority {
   if (/\b(urgent|asap|!\s*$)/i.test(text)) return 1
   if (/\b(important|soon)\b/i.test(text)) return 2
@@ -31,7 +39,7 @@ export async function quickAddTask(text: string, demoMode: boolean) {
     project: 'Inbox',
   })
 
-  revalidatePath('/')
+  revalidateTaskSurfaces()
 }
 
 export async function toggleTask(taskId: string, done: boolean) {
@@ -47,7 +55,7 @@ export async function toggleTask(taskId: string, done: boolean) {
     .eq('id', taskId)
     .eq('user_id', user.id)
 
-  revalidatePath('/')
+  revalidateTaskSurfaces()
 }
 
 export async function deleteTask(taskId: string) {
@@ -63,7 +71,7 @@ export async function deleteTask(taskId: string) {
     .eq('id', taskId)
     .eq('user_id', user.id)
 
-  revalidatePath('/')
+  revalidateTaskSurfaces()
 }
 
 export async function createTask(data: {
@@ -80,5 +88,5 @@ export async function createTask(data: {
   if (!user) return
 
   await supabase.from('tasks').insert({ ...data, user_id: user.id, done: false })
-  revalidatePath('/')
+  revalidateTaskSurfaces()
 }
