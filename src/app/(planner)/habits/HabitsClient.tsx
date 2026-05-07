@@ -297,6 +297,7 @@ function HabitEditorCard({
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Habit name"
+          aria-label="Habit name"
           className="w-full rounded-sm border border-rule bg-paper-alt px-3 py-2 font-body text-sm text-ink outline-none placeholder-ink-4"
         />
 
@@ -308,6 +309,7 @@ function HabitEditorCard({
                 key={option}
                 type="button"
                 onClick={() => setIcon(option)}
+                aria-pressed={icon === option}
                 className={`rounded-sm px-2 py-1 font-mono text-[10px] uppercase tracking-[0.3px] transition-colors cursor-pointer ${
                   icon === option ? 'bg-ink text-paper' : 'bg-card text-ink-3 hover:text-ink'
                 }`}

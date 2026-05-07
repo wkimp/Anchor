@@ -73,7 +73,7 @@ export default async function HomePage() {
 
               return (
                 <div key={chore.id} className="flex items-center gap-3 px-4 py-3">
-                  <button className={`w-4 h-4 rounded-[2px] border shrink-0 ${status === 'overdue' ? 'border-[#B45B47]' : status === 'soon' ? 'border-accent' : 'border-ink-4'}`} />
+                  <span aria-hidden="true" className={`w-4 h-4 rounded-[2px] border shrink-0 ${status === 'overdue' ? 'border-[#B45B47]' : status === 'soon' ? 'border-accent' : 'border-ink-4'}`} />
                   <div className="flex-1 font-body text-sm text-ink">{chore.name}</div>
                   <div className="w-24 font-mono text-[10px] text-ink-4">{chore.frequency}</div>
                   <div className="w-24 font-mono text-[10px] text-ink-3">{isFinite(days) ? `${days}d ago` : 'never'}</div>

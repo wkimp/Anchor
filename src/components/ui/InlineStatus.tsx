@@ -14,7 +14,11 @@ export default function InlineStatus({
   tone?: Tone
 }) {
   return (
-    <div className={`mb-4 rounded-sm border px-3 py-2 font-body text-xs ${TONE_CLASSES[tone]}`}>
+    <div
+      role="status"
+      aria-live="polite"
+      className={`mb-4 rounded-sm border px-3 py-2 font-body text-xs ${TONE_CLASSES[tone]}`}
+    >
       {message}
     </div>
   )

@@ -242,7 +242,7 @@ export function PeoplePageClient({ people: initialPeople }: { people: Person[] }
                       setCreating(false)
                       setMessage('')
                     }}
-                    className="opacity-0 rounded-sm border border-rule bg-card px-2 py-1 font-mono text-[10px] uppercase tracking-[0.3px] text-ink-3 transition-all hover:border-ink hover:text-ink group-hover:opacity-100 cursor-pointer"
+                    className="opacity-0 rounded-sm border border-rule bg-card px-2 py-1 font-mono text-[10px] uppercase tracking-[0.3px] text-ink-3 transition-all hover:border-ink hover:text-ink group-focus-within:opacity-100 group-hover:opacity-100 cursor-pointer"
                   >
                     Edit
                   </button>
@@ -313,11 +313,13 @@ function PersonEditorCard({
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Name"
+            aria-label="Person name"
             className="w-full rounded-sm border border-rule bg-paper-alt px-3 py-2 font-body text-sm text-ink outline-none placeholder-ink-4"
           />
           <select
             value={relation}
             onChange={(event) => setRelation(event.target.value)}
+            aria-label="Person relation"
             className="w-full rounded-sm border border-rule bg-paper-alt px-3 py-2 font-body text-sm text-ink outline-none cursor-pointer"
           >
             {RELATIONS.map((option) => (
@@ -330,6 +332,7 @@ function PersonEditorCard({
             type="date"
             value={lastContactAt}
             onChange={(event) => setLastContactAt(event.target.value)}
+            aria-label="Last contact date"
             className="w-full rounded-sm border border-rule bg-paper-alt px-3 py-2 font-body text-sm text-ink outline-none"
           />
         </div>

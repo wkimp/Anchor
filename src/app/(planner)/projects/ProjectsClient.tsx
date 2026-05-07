@@ -291,12 +291,14 @@ function ProjectEditorCard({
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Project name"
+            aria-label="Project name"
             className="w-full rounded-sm border border-rule bg-paper-alt px-3 py-2 font-body text-sm text-ink outline-none placeholder-ink-4"
           />
           <input
             type="date"
             value={dueDate}
             onChange={(event) => setDueDate(event.target.value)}
+            aria-label="Project due date"
             className="w-full rounded-sm border border-rule bg-paper-alt px-3 py-2 font-body text-sm text-ink outline-none"
           />
         </div>
@@ -313,6 +315,7 @@ function ProjectEditorCard({
             step={5}
             value={progress}
             onChange={(event) => setProgress(Number(event.target.value))}
+            aria-label="Project progress"
             className="w-full accent-[var(--accent)]"
           />
         </div>

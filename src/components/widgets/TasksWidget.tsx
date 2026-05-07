@@ -101,6 +101,7 @@ export default function TasksWidget({ tasks }: Props) {
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             placeholder="Add a task for today…"
+            aria-label="Task name"
             className="min-w-0 flex-1 bg-transparent border-none font-body text-sm text-ink outline-none placeholder-ink-4"
           />
           <button
@@ -116,6 +117,7 @@ export default function TasksWidget({ tasks }: Props) {
             value={draftProject}
             onChange={(event) => setDraftProject(event.target.value)}
             placeholder="Project"
+            aria-label="Project name"
             className="min-w-[110px] flex-1 rounded-sm border border-rule bg-card px-2 py-1.5 font-body text-xs text-ink outline-none placeholder-ink-4"
           />
           <div className="flex gap-1 rounded-sm border border-rule bg-card p-0.5">
@@ -124,6 +126,7 @@ export default function TasksWidget({ tasks }: Props) {
                 key={priority}
                 type="button"
                 onClick={() => setDraftPriority(priority)}
+                aria-pressed={draftPriority === priority}
                 className={`rounded-sm px-2 py-1 font-mono text-[10px] transition-colors cursor-pointer ${
                   draftPriority === priority ? 'bg-ink text-paper' : 'text-ink-3 hover:text-ink'
                 }`}
@@ -141,6 +144,7 @@ export default function TasksWidget({ tasks }: Props) {
           <button
             key={f}
             onClick={() => setFilter(f)}
+            aria-pressed={filter === f}
             className={`px-2.5 py-1 text-[10.5px] font-body uppercase tracking-[0.5px] font-medium rounded-sm cursor-pointer transition-colors ${
               filter === f ? 'bg-paper-alt text-ink' : 'text-ink-3 hover:text-ink'
             }`}
@@ -197,6 +201,7 @@ function TaskRow({
     >
       <button
         onClick={onToggle}
+        aria-label={task.done ? `Mark ${task.text} as open` : `Mark ${task.text} as done`}
         className={`w-[18px] h-[18px] rounded-sm border flex items-center justify-center flex-shrink-0 transition-all cursor-pointer ${
           task.done
             ? 'border-complete bg-complete text-card'
@@ -232,7 +237,7 @@ function TaskRow({
 
       <button
         onClick={onDelete}
-        className="opacity-0 transition-opacity text-ink-4 hover:text-[#B45B47] group-hover:opacity-100 cursor-pointer"
+        className="opacity-0 transition-opacity text-ink-4 hover:text-[#B45B47] group-focus-within:opacity-100 group-hover:opacity-100 cursor-pointer"
         aria-label="Delete task"
       >
         <Trash2 size={12} />

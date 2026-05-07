@@ -113,6 +113,7 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Title…"
+              aria-label="Note title"
               className="w-full bg-paper-alt border border-rule rounded-sm px-3 py-2 font-body text-sm text-ink placeholder-ink-4 outline-none focus:border-ink"
               autoFocus
             />
@@ -120,6 +121,7 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Write anything…"
+              aria-label="Note body"
               rows={4}
               className="w-full bg-paper-alt border border-rule rounded-sm px-3 py-2 font-body text-sm text-ink placeholder-ink-4 outline-none resize-none focus:border-ink"
             />
@@ -152,7 +154,7 @@ export function NotesPageClient({ notes: initialNotes }: { notes: Note[] }) {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[var(--gap)]">
         {notes.map((note) => (
           <div key={note.id} className="bg-card border border-rule rounded-sm p-4 group relative">
-            <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+            <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 transition-all group-focus-within:opacity-100 group-hover:opacity-100">
               <button
                 onClick={() => beginEdit(note)}
                 className="text-ink-4 hover:text-ink cursor-pointer"

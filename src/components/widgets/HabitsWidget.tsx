@@ -84,6 +84,8 @@ export default function HabitsWidget({ habits, todayDate }: Props) {
                 key={i}
                 onClick={() => handleToggle(habit.id, i, done)}
                 disabled={isPending}
+                aria-pressed={done}
+                aria-label={`${done ? 'Mark incomplete' : 'Mark complete'} for ${habit.name} on ${DAY_LABELS[i]}`}
                 className={`w-7 h-7 rounded-sm transition-all cursor-pointer flex items-center justify-center ${
                   done
                     ? 'bg-accent text-paper'
