@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 function revalidateProjectSurfaces() {
   revalidatePath('/projects')
@@ -14,7 +15,7 @@ export async function createProject(data: {
   due_date?: string
   progress?: number
 }) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return null
+  if (!hasSupabasePublicEnv()) return null
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -40,7 +41,7 @@ export async function updateProject(projectId: string, data: {
   due_date?: string
   progress: number
 }) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -61,7 +62,7 @@ export async function updateProject(projectId: string, data: {
 }
 
 export async function deleteProject(projectId: string) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

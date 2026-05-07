@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { DEMO_SCHEDULE, DEMO_TASKS } from '@/lib/demo-data'
 import PageShell from '@/components/ui/PageShell'
 import type { ScheduleBlock, Task } from '@/lib/types'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 function getWeekDays(date: Date) {
   const start = new Date(date)
@@ -50,7 +51,7 @@ export default async function WeekPage() {
   let tasks: Task[] = DEMO_TASKS
   let blocks: ScheduleBlock[] = DEMO_SCHEDULE
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 function revalidatePeopleSurfaces() {
   revalidatePath('/people')
@@ -14,7 +15,7 @@ export async function createPerson(data: {
   relation: string
   last_contact_at?: string
 }) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return null
+  if (!hasSupabasePublicEnv()) return null
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -40,7 +41,7 @@ export async function updatePerson(personId: string, data: {
   relation: string
   last_contact_at?: string
 }) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -60,7 +61,7 @@ export async function updatePerson(personId: string, data: {
 }
 
 export async function deletePerson(personId: string) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { DEMO_TASKS } from '@/lib/demo-data'
 import PageShell from '@/components/ui/PageShell'
 import type { Task } from '@/lib/types'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 type UpcomingRow = {
   label: string
@@ -51,7 +52,7 @@ export default async function UpcomingPage() {
   const today = new Date().toISOString().split('T')[0]
   let tasks: Task[] = DEMO_TASKS.filter((t) => t.due_date && t.due_date >= today && !t.done)
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()

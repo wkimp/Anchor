@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { Priority } from '@/lib/types'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 function revalidateTaskSurfaces() {
   revalidatePath('/')
@@ -21,7 +22,7 @@ function parsePriority(text: string): Priority {
 export async function quickAddTask(text: string, demoMode: boolean) {
   if (!text.trim()) return
 
-  if (demoMode || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (demoMode || !hasSupabasePublicEnv()) {
     // In demo mode, client handles optimistic state — nothing to persist server-side
     return
   }
@@ -43,7 +44,7 @@ export async function quickAddTask(text: string, demoMode: boolean) {
 }
 
 export async function toggleTask(taskId: string, done: boolean) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -59,7 +60,7 @@ export async function toggleTask(taskId: string, done: boolean) {
 }
 
 export async function deleteTask(taskId: string) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -81,7 +82,7 @@ export async function createTask(data: {
   due_date?: string
   time?: string
 }) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

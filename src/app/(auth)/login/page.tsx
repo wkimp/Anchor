@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -13,7 +14,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [mode, setMode] = useState<'login' | 'signup'>('login')
 
-  const supabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseConfigured = hasSupabasePublicEnv()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

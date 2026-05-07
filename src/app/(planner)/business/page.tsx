@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { DEMO_BUSINESS, DEMO_PEOPLE } from '@/lib/demo-data'
 import PageShell, { SectionTitle } from '@/components/ui/PageShell'
 import type { BusinessMetrics } from '@/lib/types'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 const REVENUE_SERIES = [4200, 4200, 4800, 5600, 5600, 6400, 6800, 7200, 7800, 7600, 7950, 8400]
 const REVENUE_MONTHS = ['M', 'J', 'J', 'A', 'S', 'O', 'N', 'D', 'J', 'F', 'M', 'A']
@@ -32,7 +33,7 @@ function statusClass(status: string) {
 export default async function BusinessPage() {
   let metrics: BusinessMetrics = DEMO_BUSINESS
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()

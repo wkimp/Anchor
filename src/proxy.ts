@@ -1,17 +1,20 @@
 import { createServerClient } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
+import { getSupabasePublicEnv, hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   // Skip if Supabase isn't configured (demo mode without env vars)
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (!hasSupabasePublicEnv()) {
     return supabaseResponse
   }
 
+  const { url, anonKey } = getSupabasePublicEnv()
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    anonKey,
     {
       cookies: {
         getAll() {

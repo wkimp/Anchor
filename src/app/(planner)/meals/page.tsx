@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { DEMO_MEALS } from '@/lib/demo-data'
 import PageShell, { EmptyState, SectionTitle } from '@/components/ui/PageShell'
 import type { Meal } from '@/lib/types'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const SLOTS = ['breakfast', 'lunch', 'dinner'] as const
@@ -9,7 +10,7 @@ const SLOTS = ['breakfast', 'lunch', 'dinner'] as const
 export default async function MealsPage() {
   let meals: Meal[] = DEMO_MEALS
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()

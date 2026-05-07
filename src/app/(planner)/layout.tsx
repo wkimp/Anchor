@@ -1,12 +1,13 @@
 import PlannerShell from '@/components/shell/PlannerShell'
 import { createClient } from '@/lib/supabase/server'
 import { DEMO_TASKS } from '@/lib/demo-data'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 export default async function PlannerLayout({ children }: { children: React.ReactNode }) {
   let openTaskCount = DEMO_TASKS.filter((t) => !t.done).length
 
   // If Supabase is configured, fetch real count
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()

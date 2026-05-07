@@ -3,6 +3,7 @@ import { DEMO_WELLNESS } from '@/lib/demo-data'
 import PageShell, { SectionTitle } from '@/components/ui/PageShell'
 import WellnessWidget from '@/components/widgets/WellnessWidget'
 import type { WellnessLog } from '@/lib/types'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 function buildDemoLogs(today: string) {
   return Array.from({ length: 7 }, (_, index) => {
@@ -23,7 +24,7 @@ export default async function HealthPage() {
   let logs: WellnessLog[] = []
   let todayLog: WellnessLog | null = DEMO_WELLNESS
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 function revalidateNoteSurfaces() {
   revalidatePath('/notes')
@@ -10,7 +11,7 @@ function revalidateNoteSurfaces() {
 }
 
 export async function createNote(title: string, body: string, tag: string) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return null
+  if (!hasSupabasePublicEnv()) return null
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -27,7 +28,7 @@ export async function createNote(title: string, body: string, tag: string) {
 }
 
 export async function updateNote(noteId: string, title: string, body: string, tag: string) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -43,7 +44,7 @@ export async function updateNote(noteId: string, title: string, body: string, ta
 }
 
 export async function deleteNote(noteId: string) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 function revalidateHabitSurfaces() {
   revalidatePath('/')
@@ -10,7 +11,7 @@ function revalidateHabitSurfaces() {
 }
 
 export async function toggleHabit(habitId: string, date: string, done: boolean) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -26,7 +27,7 @@ export async function toggleHabit(habitId: string, date: string, done: boolean) 
 }
 
 export async function createHabit(name: string, icon: string) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -37,7 +38,7 @@ export async function createHabit(name: string, icon: string) {
 }
 
 export async function updateHabit(habitId: string, name: string, icon: string) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -53,7 +54,7 @@ export async function updateHabit(habitId: string, name: string, icon: string) {
 }
 
 export async function deleteHabit(habitId: string) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return
+  if (!hasSupabasePublicEnv()) return
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

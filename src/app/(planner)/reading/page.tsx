@@ -2,11 +2,12 @@ import { createClient } from '@/lib/supabase/server'
 import { DEMO_BOOKS } from '@/lib/demo-data'
 import PageShell, { EmptyState, SectionTitle } from '@/components/ui/PageShell'
 import type { Book } from '@/lib/types'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 export default async function ReadingPage() {
   let books: Book[] = DEMO_BOOKS
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()

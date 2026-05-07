@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { DEMO_HABITS, DEMO_HABIT_LOGS } from '@/lib/demo-data'
 import { HabitsPageClient } from './HabitsClient'
 import type { Habit, HabitLog } from '@/lib/types'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 function offsetDate(base: string, days: number): string {
   const d = new Date(base)
@@ -24,7 +25,7 @@ export default async function HabitsPage() {
   let habits: Habit[] = DEMO_HABITS
   let logs: HabitLog[] = DEMO_HABIT_LOGS
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()

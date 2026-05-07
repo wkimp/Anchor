@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { DEMO_FINANCE_CATEGORIES, DEMO_FINANCE_TRANSACTIONS } from '@/lib/demo-data'
 import PageShell, { EmptyState, SectionTitle } from '@/components/ui/PageShell'
 import type { FinanceCategory, FinanceTransaction } from '@/lib/types'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 const INCOME = 5800
 const SAVINGS = 1400
@@ -10,7 +11,7 @@ export default async function FinancePage() {
   let categories: FinanceCategory[] = DEMO_FINANCE_CATEGORIES
   let transactions: FinanceTransaction[] = DEMO_FINANCE_TRANSACTIONS
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()

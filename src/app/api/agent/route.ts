@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 import {
   DEMO_TASKS, DEMO_HABITS, DEMO_HABIT_LOGS, DEMO_WELLNESS,
   DEMO_PROJECTS, DEMO_PEOPLE, DEMO_FINANCE_CATEGORIES, DEMO_FINANCE_TRANSACTIONS,
@@ -10,7 +11,7 @@ import type { Task, Habit, HabitLog, WellnessLog } from '@/lib/types'
 export async function POST(request: Request) {
   const body = await request.json() as { messages: Array<{ role: string; content: string }>; demoMode?: boolean }
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
   let habitLogs: HabitLog[] = DEMO_HABIT_LOGS
   let wellness: WellnessLog | null = DEMO_WELLNESS
 
-  if (!body.demoMode && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (!body.demoMode && hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()

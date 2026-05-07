@@ -15,6 +15,7 @@ import {
   DEMO_WELLNESS,
 } from '@/lib/demo-data'
 import { createClient } from '@/lib/supabase/server'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 import type {
   Book,
   BusinessMetrics,
@@ -55,7 +56,7 @@ export async function getPlannerDashboardData() {
   let financeTransactions: FinanceTransaction[] = DEMO_FINANCE_TRANSACTIONS
   let business: BusinessMetrics = DEMO_BUSINESS
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()

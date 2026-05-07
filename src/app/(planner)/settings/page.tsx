@@ -16,6 +16,7 @@ import {
   DEMO_WELLNESS,
 } from '@/lib/demo-data'
 import type { DensityName, ModeName, ThemeName, TypefaceName, WidgetKey } from '@/lib/types'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 const THEMES: { id: ThemeName; accent: string; name: string }[] = [
   { id: 'ochre', accent: '#B0763A', name: 'Ochre' },
@@ -64,7 +65,7 @@ export default function SettingsPage() {
   const [deleteStep, setDeleteStep] = useState(0)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [accountMessage, setAccountMessage] = useState('')
-  const supabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseConfigured = hasSupabasePublicEnv()
 
   function handleExport() {
     const data = {

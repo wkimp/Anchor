@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { DEMO_CHORES } from '@/lib/demo-data'
 import PageShell, { SectionTitle } from '@/components/ui/PageShell'
 import type { Chore } from '@/lib/types'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 const DEMO_PLANTS = [
   { name: 'Monstera', where: 'Living room', water: 'weekly', last: '3d ago' },
@@ -42,7 +43,7 @@ function dueClass(label: string) {
 export default async function HomePage() {
   let chores: Chore[] = DEMO_CHORES
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()

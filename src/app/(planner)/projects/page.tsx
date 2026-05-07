@@ -2,11 +2,12 @@ import { createClient } from '@/lib/supabase/server'
 import { DEMO_PROJECTS } from '@/lib/demo-data'
 import { ProjectsPageClient } from './ProjectsClient'
 import type { Project } from '@/lib/types'
+import { hasSupabasePublicEnv } from '@/lib/supabase/config'
 
 export default async function ProjectsPage() {
   let projects: Project[] = DEMO_PROJECTS
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (hasSupabasePublicEnv()) {
     try {
       const supabase = await createClient()
       const { data: { user } } = await supabase.auth.getUser()
