@@ -19,6 +19,7 @@ interface Props {
   view: ViewName
   onViewChange: (v: ViewName) => void
   openTaskCount: number
+  greetingName: string
 }
 
 function parseQuickAdd(text: string): { label: string; kind: 'day' | 'time' | 'text' }[] {
@@ -35,7 +36,7 @@ function parseQuickAdd(text: string): { label: string; kind: 'day' | 'time' | 't
   return chips
 }
 
-export default function AppHeader({ view, onViewChange, openTaskCount }: Props) {
+export default function AppHeader({ view, onViewChange, openTaskCount, greetingName }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const demoMode = useAppStore((s) => s.demoMode)
@@ -78,27 +79,40 @@ export default function AppHeader({ view, onViewChange, openTaskCount }: Props) 
     <header className="border-b border-rule bg-paper px-[var(--pad)] pt-[22px] pb-[16px] flex-shrink-0 sm:pt-[26px] sm:pb-[18px]">
       <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         {/* Date */}
-        <div>
-          <p className="mono-label mb-1.5 text-ink-3 sm:mb-2">
-            {weekday.toUpperCase()} · WEEK {weekNum}
-          </p>
-          <div className="relative inline-block font-display text-[36px] italic leading-none tracking-[-0.6px] text-ink sm:text-[45px]">
-            {month} {day}
-            <svg
-              viewBox="0 0 100 8"
-              preserveAspectRatio="none"
-              className="absolute left-0 -bottom-1 w-full"
-              style={{ height: 6 }}
-            >
-              <path
-                d="M1 5 Q 25 1, 50 4 T 99 4"
-                stroke="var(--accent)"
-                strokeWidth="1.2"
-                fill="none"
-                strokeLinecap="round"
-              />
-            </svg>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-8">
+          <div>
+            <p className="mono-label mb-1.5 text-ink-3 sm:mb-2">
+              {weekday.toUpperCase()} · WEEK {weekNum}
+            </p>
+            <div className="relative inline-block font-display text-[36px] italic leading-none tracking-[-0.6px] text-ink sm:text-[45px]">
+              {month} {day}
+              <svg
+                viewBox="0 0 100 8"
+                preserveAspectRatio="none"
+                className="absolute left-0 -bottom-1 w-full"
+                style={{ height: 6 }}
+              >
+                <path
+                  d="M1 5 Q 25 1, 50 4 T 99 4"
+                  stroke="var(--accent)"
+                  strokeWidth="1.2"
+                  fill="none"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
           </div>
+
+          {view === 'Today' && (
+            <div className="max-w-[520px] pb-0.5 sm:pb-1">
+              <h2 className="font-display text-[28px] italic leading-none tracking-[-0.5px] text-ink sm:text-[36px]">
+                Hello {greetingName}
+              </h2>
+              <p className="mt-2 text-sm text-ink-3 sm:text-base">
+                Stay anchored. Drift Less. Do more.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* View switcher */}

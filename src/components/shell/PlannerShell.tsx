@@ -13,6 +13,7 @@ import type { ViewName } from '@/lib/types'
 interface Props {
   children: React.ReactNode
   openTaskCount: number
+  greetingName: string
 }
 
 function deriveView(pathname: string): ViewName {
@@ -22,7 +23,7 @@ function deriveView(pathname: string): ViewName {
   return 'Today'
 }
 
-export default function PlannerShell({ children, openTaskCount }: Props) {
+export default function PlannerShell({ children, openTaskCount, greetingName }: Props) {
   const pathname = usePathname()
   const [view, setView] = useState<ViewName>(() => deriveView(pathname))
   const [agentOpen, setAgentOpen] = useState(false)
@@ -39,6 +40,7 @@ export default function PlannerShell({ children, openTaskCount }: Props) {
           view={view}
           onViewChange={setView}
           openTaskCount={openTaskCount}
+          greetingName={greetingName}
         />
 
         <div className="flex flex-1 overflow-hidden">
