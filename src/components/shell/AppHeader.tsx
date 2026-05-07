@@ -75,14 +75,14 @@ export default function AppHeader({ view, onViewChange, openTaskCount }: Props) 
   }
 
   return (
-    <header className="border-b border-rule bg-paper px-[var(--pad)] pt-[26px] pb-[18px] flex-shrink-0">
-      <div className="flex items-end justify-between gap-4 flex-wrap">
+    <header className="border-b border-rule bg-paper px-[var(--pad)] pt-[22px] pb-[16px] flex-shrink-0 sm:pt-[26px] sm:pb-[18px]">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         {/* Date */}
         <div>
-          <p className="mono-label mb-2 text-ink-3">
+          <p className="mono-label mb-1.5 text-ink-3 sm:mb-2">
             {weekday.toUpperCase()} · WEEK {weekNum}
           </p>
-          <div className="relative inline-block font-display text-[45px] italic leading-none tracking-[-0.6px] text-ink">
+          <div className="relative inline-block font-display text-[36px] italic leading-none tracking-[-0.6px] text-ink sm:text-[45px]">
             {month} {day}
             <svg
               viewBox="0 0 100 8"
@@ -102,12 +102,12 @@ export default function AppHeader({ view, onViewChange, openTaskCount }: Props) 
         </div>
 
         {/* View switcher */}
-        <div className="flex gap-0.5 rounded-sm border border-rule bg-card p-0.5">
+        <div className="-mx-1 flex gap-0.5 overflow-x-auto rounded-sm border border-rule bg-card p-0.5 sm:mx-0">
           {VIEWS.map((v) => (
             <button
               key={v}
               onClick={() => handleViewChange(v)}
-              className={`cursor-pointer px-3 py-1.5 text-xs font-body font-medium uppercase tracking-[0.2px] transition-colors ${
+              className={`shrink-0 cursor-pointer px-3 py-1.5 text-xs font-body font-medium uppercase tracking-[0.2px] transition-colors ${
                 view === v
                   ? 'bg-ink text-paper'
                   : 'text-ink-2 hover:bg-paper-alt hover:text-ink'
@@ -121,13 +121,13 @@ export default function AppHeader({ view, onViewChange, openTaskCount }: Props) 
 
       {/* Quick-add */}
       <form onSubmit={handleSubmit} className="mt-4">
-        <div className="paper-panel flex items-center gap-2.5 rounded-sm px-3.5 py-2.5">
+        <div className="paper-panel flex items-center gap-2 rounded-sm px-3 py-2.5 sm:gap-2.5 sm:px-3.5">
           <Plus size={15} className="text-ink-3 flex-shrink-0" />
           <input
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder={`Add anything… try "dentist Tuesday 3pm"`}
-            className="flex-1 bg-transparent border-none outline-none font-body text-sm text-ink placeholder-ink-4"
+            className="min-w-0 flex-1 bg-transparent border-none font-body text-sm text-ink outline-none placeholder-ink-4"
           />
           {!value && (
             <span className="hidden rounded-sm border border-rule bg-paper-alt px-1.5 py-0.5 font-mono text-[10px] text-ink-4 sm:flex">

@@ -82,8 +82,8 @@ export default async function WeekPage() {
 
   return (
     <PageShell title={formatWeekLabel(weekDays)} subtitle={`week ${weekNumber(today)} of 52`}>
-      <div className="border border-rule bg-card overflow-x-auto">
-        <div className="grid grid-cols-1 xl:grid-cols-7 min-w-[760px]">
+      <div className="border border-rule bg-card">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-7">
           {weekDays.map((day, index) => {
             const iso = day.toISOString().split('T')[0]
             const isToday = iso === todayIso
@@ -93,14 +93,14 @@ export default async function WeekPage() {
             return (
               <section
                 key={iso}
-                className={`min-h-[360px] p-3 xl:p-3.5 ${index < 6 ? 'xl:border-r xl:border-rule' : ''} ${index > 0 ? 'border-t xl:border-t-0 border-rule' : ''} ${isToday ? 'bg-paper-alt' : ''}`}
+                className={`min-h-[240px] p-3 sm:min-h-[280px] xl:min-h-[360px] xl:p-3.5 ${index < 6 ? 'xl:border-r xl:border-rule' : ''} ${index > 0 ? 'border-t xl:border-t-0 border-rule' : ''} ${index % 2 === 1 ? 'sm:border-l sm:border-rule xl:border-l-0' : ''} ${index > 1 ? 'sm:border-t sm:border-rule xl:border-t-0' : ''} ${isToday ? 'bg-paper-alt' : ''}`}
               >
-                <div className="pb-2 mb-3 border-b border-rule flex items-end justify-between gap-3">
+                <div className="mb-3 flex items-end justify-between gap-3 border-b border-rule pb-2">
                   <div>
                     <p className={`font-mono text-[10px] uppercase tracking-[0.45px] ${isToday ? 'text-accent' : 'text-ink-4'}`}>
                       {day.toLocaleDateString('en-US', { weekday: 'short' })}
                     </p>
-                    <p className={`font-display italic text-[24px] leading-none mt-1 ${isToday ? 'text-accent' : 'text-ink'}`}>
+                    <p className={`mt-1 font-display text-[22px] italic leading-none sm:text-[24px] ${isToday ? 'text-accent' : 'text-ink'}`}>
                       {day.getDate()}
                     </p>
                   </div>
@@ -119,7 +119,7 @@ export default async function WeekPage() {
                         <span className="w-12 shrink-0 font-mono text-[10px] text-ink-4">
                           {formatTimeLabel(block.start_ts)}
                         </span>
-                        <span className="font-body text-[11.5px] text-ink truncate">
+                        <span className="font-body text-[11.5px] leading-[1.35] text-ink">
                           {block.title}
                         </span>
                       </div>
@@ -151,9 +151,9 @@ export default async function WeekPage() {
         </div>
       </div>
 
-      <div className="mt-5 bg-card border border-rule p-5">
+      <div className="mt-5 border border-rule bg-card p-4 sm:p-5">
         <p className="mono-label text-ink-4 mb-3">This week&apos;s intentions</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {WEEKLY_INTENTIONS.map((item) => (
             <div key={item.label} className="border-l-2 border-accent pl-3">
               <p className="font-mono text-[9px] uppercase tracking-[0.45px] text-accent mb-1.5">{item.label}</p>

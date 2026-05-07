@@ -34,7 +34,7 @@ export default function PlannerShell({ children, openTaskCount }: Props) {
   return (
     <>
       <ThemeSync />
-      <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex h-full flex-col overflow-hidden">
         <AppHeader
           view={view}
           onViewChange={setView}
@@ -48,15 +48,12 @@ export default function PlannerShell({ children, openTaskCount }: Props) {
           </div>
 
           {/* Main content */}
-          <main
-            className="flex-1 overflow-y-auto"
-            id="main-content"
-          >
+          <main className="flex-1 overflow-y-auto" id="main-content">
             {children}
 
             {/* Footer */}
-            <footer className="border-t border-rule mt-6 px-[var(--pad)] py-5">
-              <div className="flex justify-between font-mono text-[10px] text-ink-4 uppercase tracking-[0.3px]">
+            <footer className="mt-6 border-t border-rule px-[var(--pad)] py-5">
+              <div className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.3px] text-ink-4 sm:flex-row sm:justify-between">
                 <span>— end of page —</span>
                 <span>
                   pg.{' '}

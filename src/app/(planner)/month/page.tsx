@@ -125,10 +125,10 @@ export default async function MonthPage() {
 
   return (
     <PageShell title={formatMonthTitle(now)} subtitle="month view">
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_300px] xl:gap-6">
         <div>
-          <div className="bg-card border border-rule overflow-hidden">
-            <div className="grid grid-cols-7 border-b border-rule">
+          <div className="overflow-x-auto rounded-sm border border-rule bg-card">
+            <div className="grid min-w-[680px] grid-cols-7 border-b border-rule">
               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
                 <div key={day} className="px-3 py-2 font-mono text-[9.5px] uppercase tracking-[0.45px] text-ink-4 text-center">
                   {day}
@@ -136,7 +136,7 @@ export default async function MonthPage() {
               ))}
             </div>
 
-            <div className="grid grid-cols-7">
+            <div className="grid min-w-[680px] grid-cols-7">
               {cells.map((cell, index) => {
                 const iso = isoForCell(year, month, cell)
                 const markers = markersByDay.get(iso) ?? []
@@ -147,9 +147,9 @@ export default async function MonthPage() {
                 return (
                   <div
                     key={`${cell.monthLabel}-${cell.num}-${index}`}
-                    className={`min-h-[96px] p-2 border-r border-t border-rule relative ${((index + 1) % 7 === 0) ? 'border-r-0' : ''} ${cell.muted ? 'opacity-35' : ''} ${isToday ? 'bg-paper-alt' : ''}`}
+                    className={`relative min-h-[88px] border-r border-t border-rule p-2 sm:min-h-[96px] ${((index + 1) % 7 === 0) ? 'border-r-0' : ''} ${cell.muted ? 'opacity-35' : ''} ${isToday ? 'bg-paper-alt' : ''}`}
                   >
-                    <div className={`font-display italic leading-none mb-1 ${isToday ? 'text-accent text-[18px]' : 'text-ink text-[15px]'}`}>
+                    <div className={`mb-1 font-display italic leading-none ${isToday ? 'text-accent text-[17px] sm:text-[18px]' : 'text-ink text-[14px] sm:text-[15px]'}`}>
                       {cell.num}
                       {isToday && (
                         <svg width="24" height="6" viewBox="0 0 24 6" className="block mt-1">
@@ -174,7 +174,7 @@ export default async function MonthPage() {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-5 font-mono text-[10px] uppercase tracking-[0.4px] text-ink-3">
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-[0.4px] text-ink-3 sm:mt-4">
             {[
               { label: 'work', kind: 'work' as const },
               { label: 'deadline', kind: 'deadline' as const },
@@ -190,7 +190,7 @@ export default async function MonthPage() {
         </div>
 
         <aside className="space-y-4">
-          <div className="bg-card border border-rule p-4">
+          <div className="border border-rule bg-card p-4">
             <p className="mono-label text-ink-4 mb-3">Deadlines this month</p>
             <div className="space-y-3">
               {deadlines.length === 0 && (
@@ -211,7 +211,7 @@ export default async function MonthPage() {
             </div>
           </div>
 
-          <div className="bg-card border border-rule p-4">
+          <div className="border border-rule bg-card p-4">
             <p className="mono-label text-ink-4 mb-2">Month notes</p>
             <p className="font-display italic text-lg text-ink leading-snug">
               A slower month, but several sharp edges. Protect the business deadlines and keep the rest spacious.

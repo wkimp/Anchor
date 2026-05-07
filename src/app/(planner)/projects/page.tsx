@@ -93,12 +93,12 @@ export default async function ProjectsPage() {
       title="Projects"
       subtitle={`${active.length} active · ${complete.length} complete`}
       action={(
-        <button className="px-3.5 py-2 border border-ink bg-ink text-paper rounded-sm font-body text-xs hover:opacity-90 transition-opacity cursor-pointer">
+        <button className="w-full rounded-sm border border-ink bg-ink px-3.5 py-2 font-body text-xs text-paper transition-opacity hover:opacity-90 sm:w-auto cursor-pointer">
           New project
         </button>
       )}
     >
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-[var(--gap)]">
+      <div className="grid grid-cols-1 gap-[var(--gap)] xl:grid-cols-2">
         {rows.map((project) => {
           const isDone = project.progress >= 100
           const urgent = project.due_date && new Date(project.due_date) < new Date(Date.now() + 8 * 86400000) && !isDone
@@ -106,18 +106,18 @@ export default async function ProjectsPage() {
           return (
             <article
               key={project.id}
-              className={`bg-card border border-rule rounded-sm p-5 ${isDone ? 'opacity-65' : ''}`}
+              className={`rounded-sm border border-rule bg-card p-4 sm:p-5 ${isDone ? 'opacity-65' : ''}`}
             >
-              <div className="flex items-baseline gap-3 mb-1">
+              <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-baseline sm:gap-3">
                 <h2 className={`flex-1 font-display italic text-[20px] text-ink leading-tight ${isDone ? 'line-through' : ''}`}>
                   {project.name}
                 </h2>
-                <span className="px-2 py-0.5 bg-paper-alt font-mono text-[9px] uppercase tracking-[0.4px] text-ink-4">
+                <span className="w-fit bg-paper-alt px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.4px] text-ink-4">
                   {project.area}
                 </span>
               </div>
 
-              <p className={`font-mono text-[11px] mb-4 ${urgent ? 'text-[#B45B47]' : 'text-ink-3'}`}>
+              <p className={`mb-4 font-mono text-[11px] leading-relaxed ${urgent ? 'text-[#B45B47]' : 'text-ink-3'}`}>
                 due {formatDue(project.due_date)} · {project.done}/{project.tasks} tasks
               </p>
 

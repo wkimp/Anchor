@@ -225,14 +225,14 @@ export default function SettingsPage() {
 
       <SectionTitle>Appearance</SectionTitle>
       <div className="space-y-4">
-        <div className="bg-card border border-rule rounded-sm p-5">
+        <div className="bg-card border border-rule rounded-sm p-4 sm:p-5">
           <p className="font-body text-sm text-ink mb-3">Theme</p>
-          <div className="flex gap-3 flex-wrap">
+          <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:gap-3">
             {THEMES.map((theme) => (
               <button
                 key={theme.id}
                 onClick={() => setTheme(theme.id)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-sm border font-body text-sm cursor-pointer transition-colors ${
+                className={`flex items-center gap-2 rounded-sm border px-3 py-2 text-left font-body text-sm transition-colors cursor-pointer ${
                   tweaks.theme === theme.id ? 'border-ink bg-paper-alt text-ink' : 'border-rule text-ink-2 hover:border-ink'
                 }`}
               >
@@ -243,7 +243,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="bg-card border border-rule rounded-sm p-5 space-y-4">
+        <div className="bg-card border border-rule rounded-sm p-4 space-y-4 sm:p-5">
           <ToggleRow
             label="Mode"
             options={['light', 'dark'] as ModeName[]}
@@ -258,12 +258,12 @@ export default function SettingsPage() {
             onChange={setDensity}
           />
 
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center sm:gap-4">
             <span className="font-body text-sm text-ink-2">Typeface</span>
             <select
               value={tweaks.typeface}
               onChange={(event) => setTypeface(event.target.value as TypefaceName)}
-              className="bg-paper-alt border border-rule rounded-sm px-2 py-1.5 font-body text-xs text-ink outline-none cursor-pointer"
+              className="w-full rounded-sm border border-rule bg-paper-alt px-2 py-1.5 font-body text-xs text-ink outline-none sm:w-auto cursor-pointer"
             >
               {TYPEFACES.map((typeface) => (
                 <option key={typeface.id} value={typeface.id}>
@@ -276,11 +276,11 @@ export default function SettingsPage() {
       </div>
 
       <SectionTitle>Home screen</SectionTitle>
-      <div className="bg-card border border-rule rounded-sm p-5">
+      <div className="bg-card border border-rule rounded-sm p-4 sm:p-5">
         <p className="font-body text-sm text-ink-3 mb-3">
           Choose which widgets appear on your planner dashboard.
         </p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
           {WIDGETS.map(({ key, label }) => (
             <label key={key} className="flex items-center gap-2 cursor-pointer">
               <input
@@ -341,7 +341,7 @@ export default function SettingsPage() {
       )}
 
       <SectionTitle>About</SectionTitle>
-      <div className="bg-paper-alt border border-rule rounded-sm border-l-[3px] border-l-accent p-5">
+      <div className="bg-paper-alt border border-rule rounded-sm border-l-[3px] border-l-accent p-4 sm:p-5">
         <p className="font-display italic text-[22px] text-ink leading-snug mb-2">
           Anchor is a quiet life planner.
         </p>
@@ -363,12 +363,12 @@ function SettingsRow({
   action: React.ReactNode
 }) {
   return (
-    <div className="flex items-center justify-between gap-5 px-5 py-4">
+    <div className="flex flex-col items-start justify-between gap-3 px-4 py-4 sm:flex-row sm:items-center sm:gap-5 sm:px-5">
       <div className="flex-1">
         <p className="font-body text-sm font-medium text-ink">{label}</p>
         <p className="font-body text-xs leading-relaxed text-ink-3 mt-1">{sub}</p>
       </div>
-      <div className="shrink-0">{action}</div>
+      <div className="w-full sm:w-auto sm:shrink-0">{action}</div>
     </div>
   )
 }
@@ -385,14 +385,14 @@ function ToggleRow<T extends string>({
   onChange: (value: T) => void
 }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center sm:gap-4">
       <span className="font-body text-sm text-ink-2">{label}</span>
-      <div className="flex gap-1 border border-rule rounded-sm p-0.5">
+      <div className="flex w-full gap-1 rounded-sm border border-rule p-0.5 sm:w-auto">
         {options.map((option) => (
           <button
             key={option}
             onClick={() => onChange(option)}
-            className={`px-3 py-1 text-xs capitalize transition-colors cursor-pointer ${
+            className={`flex-1 px-3 py-1 text-xs capitalize transition-colors sm:flex-none cursor-pointer ${
               value === option ? 'bg-ink text-paper' : 'text-ink-2 hover:text-ink'
             }`}
           >
