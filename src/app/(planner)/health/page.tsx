@@ -4,6 +4,20 @@ import PageShell, { SectionTitle } from '@/components/ui/PageShell'
 import WellnessWidget from '@/components/widgets/WellnessWidget'
 import type { WellnessLog } from '@/lib/types'
 
+function buildDemoLogs(today: string) {
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(today)
+    date.setDate(date.getDate() - index)
+    return {
+      ...DEMO_WELLNESS,
+      date: date.toISOString().split('T')[0],
+      sleep_hours: 6.4 + ((index * 7) % 15) / 10,
+      steps: 2600 + index * 670,
+      mood: 5 + (index % 5),
+    }
+  })
+}
+
 export default async function HealthPage() {
   const today = new Date().toISOString().split('T')[0]
   let logs: WellnessLog[] = []
@@ -22,70 +36,106 @@ export default async function HealthPage() {
           .limit(30)
         if (data?.length) {
           logs = data as WellnessLog[]
-          todayLog = logs.find((l) => l.date === today) ?? null
+          todayLog = logs.find((log) => log.date === today) ?? null
         }
       }
-    } catch { /* use demo */ }
+    } catch {
+      // use demo data
+    }
   }
 
-  const displayLogs = logs.length ? logs : Array.from({ length: 7 }, (_, i) => ({
-    ...DEMO_WELLNESS, date: (() => { const d = new Date(today); d.setDate(d.getDate() - i); return d.toISOString().split('T')[0] })(),
-    sleep_hours: 6.5 + Math.random(), steps: Math.floor(3000 + Math.random() * 5000), mood: Math.floor(5 + Math.random() * 5),
-  }))
-
-  const avg7Sleep = (displayLogs.slice(0, 7).reduce((a, l) => a + (l.sleep_hours ?? 0), 0) / 7).toFixed(1)
-  const avg7Steps = Math.round(displayLogs.slice(0, 7).reduce((a, l) => a + (l.steps ?? 0), 0) / 7)
-  const avg7Mood = (displayLogs.slice(0, 7).reduce((a, l) => a + (l.mood ?? 0), 0) / 7).toFixed(1)
+  const displayLogs = logs.length ? logs.slice(0, 7) : buildDemoLogs(today)
+  const avg7Sleep = (displayLogs.reduce((sum, log) => sum + (log.sleep_hours ?? 0), 0) / displayLogs.length).toFixed(1)
+  const avg7Steps = Math.round(displayLogs.reduce((sum, log) => sum + (log.steps ?? 0), 0) / displayLogs.length)
+  const avg7Mood = (displayLogs.reduce((sum, log) => sum + (log.mood ?? 0), 0) / displayLogs.length).toFixed(1)
 
   return (
-    <PageShell
-      title="Health"
-      subtitle={`${avg7Sleep}h sleep · ${avg7Steps.toLocaleString()} steps · ${avg7Mood}/10 mood (7-day avg)`}
-    >
+    <PageShell title="Health" subtitle="body, sleep, movement">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-[var(--gap)] mb-6">
+        <MetricCard label="Sleep avg" big={`${avg7Sleep}h`} sub="7-day · target 7.5" />
+        <MetricCard label="Mood avg" big={avg7Mood} sub="out of 10" />
+        <MetricCard label="Steps" big={avg7Steps.toLocaleString()} sub="this week" />
+        <MetricCard label="Workouts" big="3 / 4" sub="Mon, Wed, Fri" />
+      </div>
+
       <SectionTitle>Today</SectionTitle>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[var(--gap)] mb-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-[var(--gap)] mb-6">
         <WellnessWidget log={todayLog} />
       </div>
 
-      <SectionTitle>7-day sleep</SectionTitle>
-      <div className="bg-card border border-rule rounded-sm p-5">
-        <div className="flex items-end gap-1.5 h-20">
-          {displayLogs.slice(0, 7).reverse().map((log, i) => {
-            const pct = Math.min(100, ((log.sleep_hours ?? 0) / 9) * 100)
+      <SectionTitle>Sleep · last 7 nights</SectionTitle>
+      <div className="bg-card border border-rule rounded-sm p-5 mb-6">
+        <div className="flex items-end gap-3 h-36">
+          {displayLogs.slice().reverse().map((log, index) => {
+            const height = Math.min(100, ((log.sleep_hours ?? 0) / 10) * 100)
             return (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                <div className="w-full bg-paper-alt rounded-sm overflow-hidden" style={{ height: '64px' }}>
-                  <div className="w-full bg-accent rounded-sm transition-all" style={{ height: `${pct}%`, marginTop: `${100 - pct}%` }} />
+              <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                <p className="font-mono text-[10px] text-ink-3">{log.sleep_hours?.toFixed(1)}h</p>
+                <div className="w-full h-full bg-rule relative">
+                  <div className="absolute inset-x-0 bottom-0 bg-accent" style={{ height: `${height}%` }} />
                 </div>
-                <span className="font-mono text-[9px] text-ink-4">{log.sleep_hours?.toFixed(1)}h</span>
+                <p className="font-mono text-[9px] text-ink-4">{new Date(`${log.date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'narrow' })}</p>
               </div>
             )
           })}
         </div>
-        <div className="flex justify-between mt-2">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
-            <span key={d} className="flex-1 text-center font-mono text-[9px] text-ink-4">{d}</span>
-          ))}
+        <div className="mt-4 pt-3 border-t border-dashed border-rule flex justify-between font-mono text-[10px] text-ink-3">
+          <span>bedtime avg · 23:18</span>
+          <span>wake avg · 06:34</span>
+          <span>quality · 78%</span>
         </div>
       </div>
 
-      <SectionTitle>7-day mood</SectionTitle>
-      <div className="bg-card border border-rule rounded-sm p-5">
-        <div className="flex items-end gap-1.5 h-16">
-          {displayLogs.slice(0, 7).reverse().map((log, i) => {
-            const pct = ((log.mood ?? 0) / 10) * 100
-            return (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                <div className="w-full bg-paper-alt rounded-sm overflow-hidden" style={{ height: '48px' }}>
-                  <div className="w-full bg-accent-soft rounded-sm border border-accent transition-all"
-                    style={{ height: `${pct}%`, marginTop: `${100 - pct}%` }} />
-                </div>
-                <span className="font-mono text-[9px] text-ink-4">{log.mood}</span>
-              </div>
-            )
-          })}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div>
+          <SectionTitle>Movement</SectionTitle>
+          <div className="bg-card border border-rule rounded-sm p-5">
+            <div className="flex items-end gap-2 h-28">
+              {displayLogs.slice().reverse().map((log, index) => {
+                const height = Math.min(100, ((log.steps ?? 0) / 8000) * 100)
+                return (
+                  <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                    <div className="w-full h-full bg-rule relative">
+                      <div className="absolute inset-x-0 bottom-0 bg-ink-3/70" style={{ height: `${height}%` }} />
+                    </div>
+                    <p className="font-mono text-[9px] text-ink-4">{new Date(`${log.date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'narrow' })}</p>
+                  </div>
+                )
+              })}
+            </div>
+            <p className="mt-3 font-mono text-[10px] text-ink-3">daily goal · 8,000 steps</p>
+          </div>
+        </div>
+
+        <div>
+          <SectionTitle>Mood</SectionTitle>
+          <div className="bg-card border border-rule rounded-sm p-5">
+            <div className="flex items-end gap-3 h-28">
+              {displayLogs.slice().reverse().map((log, index) => {
+                const height = Math.min(100, ((log.mood ?? 0) / 10) * 100)
+                return (
+                  <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                    <div className="w-full h-full flex items-end justify-center">
+                      <div className="w-3 rounded-full border border-accent bg-accent-soft" style={{ height: `${Math.max(12, height)}%` }} />
+                    </div>
+                    <p className="font-mono text-[9px] text-ink-4">{new Date(`${log.date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'narrow' })}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </PageShell>
+  )
+}
+
+function MetricCard({ label, big, sub }: { label: string; big: string; sub: string }) {
+  return (
+    <div className="bg-card border border-rule rounded-sm p-4">
+      <p className="mono-label text-ink-4 mb-2">{label}</p>
+      <p className="font-display italic text-[30px] text-ink leading-none">{big}</p>
+      <p className="font-mono text-[10px] text-ink-3 mt-2">{sub}</p>
+    </div>
   )
 }

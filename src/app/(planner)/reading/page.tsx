@@ -18,18 +18,17 @@ export default async function ReadingPage() {
           .order('created_at', { ascending: false })
         if (data?.length) books = data as Book[]
       }
-    } catch { /* use demo */ }
+    } catch {
+      // use demo data
+    }
   }
 
-  const reading = books.filter((b) => b.status === 'reading')
-  const queued = books.filter((b) => b.status === 'queued')
-  const done = books.filter((b) => b.status === 'done')
+  const reading = books.filter((book) => book.status === 'reading')
+  const queued = books.filter((book) => book.status === 'queued')
+  const done = books.filter((book) => book.status === 'done')
 
   return (
-    <PageShell
-      title="Reading"
-      subtitle={`${reading.length} in progress · ${queued.length} queued · ${done.length} done`}
-    >
+    <PageShell title="Reading" subtitle={`${reading.length} in progress · ${queued.length} queued · ${done.length} done`}>
       <SectionTitle>In progress</SectionTitle>
       <BookList books={reading} showProgress />
 
@@ -54,22 +53,21 @@ function BookList({ books, showProgress = false }: { books: Book[]; showProgress
   if (!books.length) {
     return <p className="font-body text-sm text-ink-4 italic py-3">Nothing here yet.</p>
   }
+
   return (
-    <div className="bg-card border border-rule rounded-sm divide-y divide-rule-2 mb-6">
+    <div className="bg-card border border-rule rounded-sm divide-y divide-dashed divide-rule mb-6">
       {books.map((book) => (
-        <div key={book.id} className="px-4 py-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <p className="font-body text-sm font-medium text-ink">{book.title}</p>
-              <p className="font-body text-xs text-ink-3 mt-0.5">{book.author}</p>
-            </div>
-            {showProgress && (
-              <span className="font-mono text-[11px] text-ink-3 flex-shrink-0">{book.progress}%</span>
-            )}
+        <div key={book.id} className="px-4 py-4">
+          <div className="flex items-baseline gap-3 mb-1">
+            <p className="flex-1 font-display italic text-[16px] text-ink truncate">{book.title}</p>
+            <span className="font-mono text-[10px] text-ink-4">
+              {book.status === 'done' ? '✓' : book.status === 'queued' ? '—' : `${book.progress}%`}
+            </span>
           </div>
+          <p className="font-body text-xs text-ink-3 mb-3">{book.author}</p>
           {showProgress && book.progress > 0 && (
-            <div className="mt-2 h-1 bg-rule rounded-full overflow-hidden">
-              <div className="h-full bg-accent rounded-full" style={{ width: `${book.progress}%` }} />
+            <div className="h-1 bg-rule overflow-hidden">
+              <div className="h-full bg-accent" style={{ width: `${book.progress}%` }} />
             </div>
           )}
         </div>
