@@ -85,6 +85,9 @@ export function PeoplePageClient({ people: initialPeople }: { people: Person[] }
   )
   const overdue = rows.filter((person) => person.due === 'overdue' || person.due === 'never')
   const thisWeek = rows.filter((person) => person.due === 'this week')
+  const mostRecent = [...rows]
+    .filter((person) => Number.isFinite(daysSince(person.last_contact_at)))
+    .sort((a, b) => daysSince(a.last_contact_at) - daysSince(b.last_contact_at))[0]
 
   function handleCreate(payload: { name: string; relation: string; last_contact_at: string }) {
     const now = new Date().toISOString()
@@ -172,7 +175,7 @@ export function PeoplePageClient({ people: initialPeople }: { people: Person[] }
         <StatCard label="Overdue" big={String(overdue.length)} sub={overdue.map((p) => p.name).join(', ') || 'none'} />
         <StatCard label="This week" big={String(thisWeek.length)} sub={thisWeek.map((p) => p.name).join(', ') || 'none'} />
         <StatCard label="Streaks" big="4" sub="weekly with Dev" />
-        <StatCard label="Last seen" big={rows[0]?.name ?? '—'} sub={rows[0] ? lastSeenLabel(daysSince(rows[0].last_contact_at)) : 'no contacts yet'} />
+        <StatCard label="Last seen" big={mostRecent?.name ?? '—'} sub={mostRecent ? lastSeenLabel(daysSince(mostRecent.last_contact_at)) : 'no contacts yet'} />
       </div>
 
       <SectionTitle>Keep in touch</SectionTitle>

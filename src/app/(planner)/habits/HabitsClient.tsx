@@ -51,6 +51,10 @@ export function HabitsPageClient({
 
   const longestStreak = Math.max(...habits.map((habit) => habit.streak), 0)
   const completedToday = habits.filter((habit) => habit.weekDone[6]).length
+  const mostConsistent = habits.reduce<HabitRow | null>((best, habit) => {
+    if (!best || habit.streak > best.streak) return habit
+    return best
+  }, null)
 
   const logsByHabit = useMemo(() => {
     const map = new Map<string, HabitLog[]>()
@@ -147,7 +151,7 @@ export function HabitsPageClient({
         <StatCard label="Tracked" big={String(habits.length)} sub="habits in rotation" />
         <StatCard label="Done today" big={String(completedToday)} sub={`${Math.max(habits.length - completedToday, 0)} still open`} />
         <StatCard label="Longest streak" big={`${longestStreak}`} sub="days in a row" />
-        <StatCard label="Most consistent" big={habits[0]?.name ?? '—'} sub={habits[0] ? `${habits[0].streak} day streak` : 'no habits yet'} />
+        <StatCard label="Most consistent" big={mostConsistent?.name ?? '—'} sub={mostConsistent ? `${mostConsistent.streak} day streak` : 'no habits yet'} />
       </div>
 
       <SectionTitle>This week</SectionTitle>

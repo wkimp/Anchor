@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { DEMO_BOOKS } from '@/lib/demo-data'
-import PageShell, { SectionTitle } from '@/components/ui/PageShell'
+import PageShell, { EmptyState, SectionTitle } from '@/components/ui/PageShell'
 import type { Book } from '@/lib/types'
 
 export default async function ReadingPage() {
@@ -51,7 +51,12 @@ export default async function ReadingPage() {
 
 function BookList({ books, showProgress = false }: { books: Book[]; showProgress?: boolean }) {
   if (!books.length) {
-    return <p className="font-body text-sm text-ink-4 italic py-3">Nothing here yet.</p>
+    return (
+      <EmptyState
+        title="Nothing here yet."
+        body="Add a book when you want this shelf to feel like a living reading life instead of a blank ledger."
+      />
+    )
   }
 
   return (
