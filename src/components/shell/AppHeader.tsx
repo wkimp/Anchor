@@ -79,10 +79,10 @@ export default function AppHeader({ view, onViewChange, openTaskCount }: Props) 
       <div className="flex items-end justify-between gap-4 flex-wrap">
         {/* Date */}
         <div>
-          <p className="mono-label text-ink-3 mb-1.5">
+          <p className="mono-label mb-2 text-ink-3">
             {weekday.toUpperCase()} · WEEK {weekNum}
           </p>
-          <div className="font-display text-[44px] italic text-ink leading-none tracking-[-0.5px] relative inline-block">
+          <div className="relative inline-block font-display text-[45px] italic leading-none tracking-[-0.6px] text-ink">
             {month} {day}
             <svg
               viewBox="0 0 100 8"
@@ -102,15 +102,15 @@ export default function AppHeader({ view, onViewChange, openTaskCount }: Props) 
         </div>
 
         {/* View switcher */}
-        <div className="flex gap-0.5 border border-rule rounded-sm p-0.5">
+        <div className="flex gap-0.5 rounded-sm border border-rule bg-card p-0.5">
           {VIEWS.map((v) => (
             <button
               key={v}
               onClick={() => handleViewChange(v)}
-              className={`px-3 py-1.5 text-xs font-body uppercase tracking-[0.2px] font-medium cursor-pointer transition-colors ${
+              className={`cursor-pointer px-3 py-1.5 text-xs font-body font-medium uppercase tracking-[0.2px] transition-colors ${
                 view === v
                   ? 'bg-ink text-paper'
-                  : 'text-ink-2 hover:text-ink'
+                  : 'text-ink-2 hover:bg-paper-alt hover:text-ink'
               }`}
             >
               {v}
@@ -121,7 +121,7 @@ export default function AppHeader({ view, onViewChange, openTaskCount }: Props) 
 
       {/* Quick-add */}
       <form onSubmit={handleSubmit} className="mt-4">
-        <div className="flex items-center gap-2.5 border border-rule bg-card px-3.5 py-2.5 rounded-sm">
+        <div className="paper-panel flex items-center gap-2.5 rounded-sm px-3.5 py-2.5">
           <Plus size={15} className="text-ink-3 flex-shrink-0" />
           <input
             value={value}
@@ -130,7 +130,7 @@ export default function AppHeader({ view, onViewChange, openTaskCount }: Props) 
             className="flex-1 bg-transparent border-none outline-none font-body text-sm text-ink placeholder-ink-4"
           />
           {!value && (
-            <span className="font-mono text-[10px] text-ink-4 border border-rule px-1.5 py-0.5 rounded-sm hidden sm:flex">
+            <span className="hidden rounded-sm border border-rule bg-paper-alt px-1.5 py-0.5 font-mono text-[10px] text-ink-4 sm:flex">
               ⏎
             </span>
           )}
@@ -138,7 +138,7 @@ export default function AppHeader({ view, onViewChange, openTaskCount }: Props) 
             <button
               type="submit"
               disabled={isPending}
-              className="font-mono text-[10px] text-ink-4 border border-rule px-1.5 py-0.5 rounded-sm cursor-pointer hover:text-ink"
+              className="cursor-pointer rounded-sm border border-rule bg-paper-alt px-1.5 py-0.5 font-mono text-[10px] text-ink-4 transition-colors hover:text-ink"
             >
               {isPending ? '…' : 'Add'}
             </button>

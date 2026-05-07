@@ -128,6 +128,20 @@ html, body {
   letter-spacing: 0.14em;
 }
 
+.paper-panel {
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rule) 88%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--paper) 65%, transparent),
+    0 12px 30px -24px color-mix(in srgb, var(--ink) 30%, transparent);
+}
+
+.paper-inset {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--paper-alt) 88%, transparent), transparent 78%),
+    var(--card);
+}
+
 /* smooth skeleton/loading shimmer */
 .shimmer {
   background: linear-gradient(90deg, var(--rule-2) 25%, var(--rule) 50%, var(--rule-2) 75%);

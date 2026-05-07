@@ -70,12 +70,12 @@ export default function AppSidebar({ openTaskCount }: Props) {
 
   return (
     <nav
-      className="w-[220px] flex-shrink-0 overflow-y-auto border-r border-rule bg-paper py-5"
+      className="w-[226px] flex-shrink-0 overflow-y-auto border-r border-rule bg-paper py-6"
       aria-label="Main navigation"
     >
-      {NAV_SECTIONS.map((section) => (
-        <div key={section.group} className="mb-5">
-          <p className="mono-label text-ink-4 px-5 mb-2">{section.group}</p>
+      {NAV_SECTIONS.map((section, index) => (
+        <div key={section.group} className={index === NAV_SECTIONS.length - 1 ? '' : 'mb-6'}>
+          <p className="mono-label mb-2.5 px-5 text-ink-4">{section.group}</p>
           {section.items.map((item) => {
             const active = isActive(item.href)
             const IconComp = ICON_MAP[item.icon] ?? Circle
@@ -83,10 +83,10 @@ export default function AppSidebar({ openTaskCount }: Props) {
               <Link
                 key={item.id}
                 href={item.href}
-                className={`flex items-center gap-2.5 w-full px-5 py-[7px] text-sm font-body relative transition-colors ${
+                className={`relative flex w-full items-center gap-2.5 px-5 py-[8px] text-sm font-body transition-colors ${
                   active
-                    ? 'text-ink font-medium'
-                    : 'text-ink-2 hover:text-ink'
+                    ? 'bg-paper-alt/60 text-ink font-medium'
+                    : 'text-ink-2 hover:bg-paper-alt/35 hover:text-ink'
                 }`}
               >
                 {active && (
@@ -101,7 +101,7 @@ export default function AppSidebar({ openTaskCount }: Props) {
                 />
                 <span className="flex-1">{item.label}</span>
                 {item.showCount && openTaskCount > 0 && (
-                  <span className="font-mono text-[10px] text-ink-3">
+                  <span className="rounded-full border border-rule bg-card px-1.5 py-0.5 font-mono text-[10px] text-ink-3">
                     {openTaskCount}
                   </span>
                 )}
