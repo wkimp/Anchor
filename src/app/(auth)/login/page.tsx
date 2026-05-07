@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { hasSupabasePublicEnv } from '@/lib/supabase/config'
@@ -15,6 +15,16 @@ export default function LoginPage() {
   const [mode, setMode] = useState<'login' | 'signup'>('login')
 
   const supabaseConfigured = hasSupabasePublicEnv()
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+
+    if (params.get('reset') === 'success') {
+      setMessage('Password updated. You can sign in with your new password.')
+    } else if (params.get('error') === 'auth') {
+      setError('That sign-in or recovery link is no longer valid. Try again.')
+    }
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -56,6 +66,33 @@ export default function LoginPage() {
     }
 
     setLoading(false)
+  }
+
+  async function handleForgotPassword() {
+    if (!email.trim()) {
+      setError('Enter your email first, then use forgot password.')
+      setMessage('')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setMessage('')
+
+    try {
+      const supabase = createClient()
+      const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+
+      if (err) {
+        setError(err.message)
+      } else {
+        setMessage('Password reset email sent. Check your inbox for the secure link.')
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -132,6 +169,16 @@ export default function LoginPage() {
                     minLength={8}
                     className="w-full bg-paper border border-rule rounded-sm px-3 py-2.5 font-body text-sm text-ink placeholder-ink-4 outline-none focus:border-ink transition-colors"
                   />
+                  <div className="mt-2 text-right">
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      disabled={loading}
+                      className="font-body text-xs text-ink-3 transition-colors hover:text-ink disabled:opacity-50 cursor-pointer"
+                    >
+                      Forgot your password?
+                    </button>
+                  </div>
                 </div>
 
                 {error && (
