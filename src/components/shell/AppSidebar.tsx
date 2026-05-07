@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import AnchorLogo from '@/components/branding/AnchorLogo'
 import {
   Sparkles, Calendar, ArrowRight, Moon,
   Briefcase, Folder, Users, Home, Heart,
@@ -73,6 +74,10 @@ export default function AppSidebar({ openTaskCount }: Props) {
       className="w-[226px] flex-shrink-0 overflow-y-auto border-r border-rule bg-paper py-6"
       aria-label="Main navigation"
     >
+      <div className="mb-6 px-5">
+        <AnchorLogo size="sidebar" href="/" subtitle="Drift Less. Do more." />
+      </div>
+
       {NAV_SECTIONS.map((section, index) => (
         <div key={section.group} className={index === NAV_SECTIONS.length - 1 ? '' : 'mb-6'}>
           <p className="mono-label mb-2.5 px-5 text-ink-4">{section.group}</p>

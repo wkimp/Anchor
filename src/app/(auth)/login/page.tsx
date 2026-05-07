@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { hasSupabasePublicEnv } from '@/lib/supabase/config'
+import AnchorLogo from '@/components/branding/AnchorLogo'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -100,10 +101,10 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Wordmark */}
         <div className="mb-10 text-center">
-          <h1 className="font-display text-[44px] italic text-ink leading-none tracking-[-0.5px]">
-            Anchor
-          </h1>
-          <p className="mono-label text-ink-4 mt-3">Your life, quietly organised</p>
+          <AnchorLogo
+            size="auth"
+            subtitle="Drift Less. Do more."
+          />
         </div>
 
         {/* Card */}
